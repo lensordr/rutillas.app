@@ -257,8 +257,8 @@ export function ChatPage() {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', background: 'var(--bg)' }}>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderBottom: '1px solid var(--border)', background: 'rgba(245,245,245,0.95)', backdropFilter: 'blur(20px)', flexShrink: 0 }}>
-        <button className="btn btn-ghost btn-icon" onClick={() => navigate(`/events/${id}`)}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderBottom: '1px solid var(--border)', background: 'rgba(245,245,245,0.95)', backdropFilter: 'blur(20px)', flexShrink: 0, zIndex: 10 }}>
+        <button className="btn btn-ghost btn-icon" onClick={() => navigate(-1)} style={{ minWidth: 44, minHeight: 44 }}>
           <IconBack />
         </button>
         <div style={{ flex: 1 }}>
