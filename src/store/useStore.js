@@ -28,7 +28,7 @@ const useStore = create(
 
       register: async (data) => {
         try {
-          await api.register({
+          const response = await api.register({
             username: data.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, '') + Date.now().toString().slice(-4),
             email: data.email,
             password: data.password,
@@ -46,7 +46,7 @@ const useStore = create(
             promo_code: data.promoCode || '',
             captcha_token: data.captchaToken || '',
           })
-          return { ok: true }
+          return { ok: true, payment_url: response?.payment_url || null }
         } catch (e) {
           const errs = e.data || {}
           const msg = errs.email?.[0] || errs.username?.[0] || errs.error || 'Error al registrarse'

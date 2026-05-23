@@ -31,7 +31,7 @@ const HEARD_FROM_OPTIONS = [
 ]
 
 // ─── Email Confirm Screen ─────────────────────────────────────────────────────
-function EmailConfirmScreen({ email, onDone }) {
+function EmailConfirmScreen({ email, paymentUrl, onDone }) {
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -98,6 +98,26 @@ function EmailConfirmScreen({ email, onDone }) {
         </div>
       )}
 
+      {paymentUrl && (
+        <div style={{ background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', borderRadius: 'var(--radius-lg)', padding: '20px', marginBottom: 16, maxWidth: 380, width: '100%' }}>
+          <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 18, fontWeight: 900, textTransform: 'uppercase', marginBottom: 6 }}>
+            🎉 ¡Tienes un descuento!
+          </p>
+          <p style={{ fontSize: 14, color: 'var(--text-2)', marginBottom: 14, lineHeight: 1.5 }}>
+            Tu código incluye un descuento especial. Activa tu suscripción con precio reducido:
+          </p>
+          <a
+            href={paymentUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-primary btn-full"
+            style={{ textDecoration: 'none' }}
+          >
+            🏍️ Suscribirse con descuento
+          </a>
+        </div>
+      )}
+
       <button
         className="btn btn-ghost btn-full"
         style={{ maxWidth: 320, marginBottom: 16 }}
@@ -142,6 +162,7 @@ export default function AuthPage() {
   const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [showInstall, setShowInstall] = useState(false)
   const [showEmailConfirm, setShowEmailConfirm] = useState(false)
+  const [promoPaymentUrl, setPromoPaymentUrl] = useState(null)
   const [captchaToken, setCaptchaToken] = useState(null)
   const navigate = useNavigate()
   const login = useStore((s) => s.login)
@@ -285,6 +306,10 @@ export default function AuthPage() {
       setCaptchaToken(null)
     } else {
       resetRateLimit('register')
+      // If promo code has a payment URL (discount), show it
+      if (result.payment_url) {
+        setPromoPaymentUrl(result.payment_url)
+      }
       // Always show install screen first, then email confirm
       setShowInstall(true)
     }
@@ -297,6 +322,7 @@ export default function AuthPage() {
     return (
       <EmailConfirmScreen
         email={form.email}
+        paymentUrl={promoPaymentUrl}
         onDone={() => { setShowEmailConfirm(false); setMode('login'); setStep(1) }}
       />
     )
