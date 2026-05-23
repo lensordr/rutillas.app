@@ -431,6 +431,22 @@ export default function ProfilePage() {
               )}
               <InfoRow label="Nos conoció por" value={HEARD_FROM_LABELS[currentUser?.heard_from]} />
             </div>
+            {currentUser?.is_subscribed && !currentUser?.is_free_user && (
+              <div style={{ marginTop: 12, background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '14px 16px', boxShadow: 'var(--shadow-sm)' }}>
+                <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 10 }}>
+                  Para gestionar o cancelar tu suscripción, revisa el email de confirmación de pago de Square.
+                </p>
+                <a
+                  href="https://squareup.com/login"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-ghost btn-full btn-sm"
+                  style={{ textDecoration: 'none' }}
+                >
+                  Gestionar suscripción en Square →
+                </a>
+              </div>
+            )}
           </div>
         )}
 
