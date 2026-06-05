@@ -213,7 +213,7 @@ export default function AuthPage() {
     const e = {}
     if (!form.motoType) e.motoType = 'Selecciona el tipo de moto'
     if (!form.motoModel.trim()) e.motoModel = 'Indica tu moto'
-    if (!form.location.trim()) e.location = 'Indica tu ciudad'
+    if (!form.latitude) e.location = 'Activa tu ubicación para continuar'
     if (!form.experience) e.experience = 'Selecciona tu nivel'
     setErrors(e)
     return Object.keys(e).length === 0
@@ -570,12 +570,93 @@ export default function AuthPage() {
                     value={form.motoModel} onChange={(e) => set('motoModel', e.target.value)} />
                   {errors.motoModel && <span className="form-error">{errors.motoModel}</span>}
                 </div>
+                {/* Mandatory GPS location */}
                 <div className="form-group">
-                  <label className="form-label">Tu ciudad / ubicación</label>
-                  <input className="form-input" type="text" placeholder="Ej: Madrid, Barcelona..."
-                    value={form.location} onChange={(e) => set('location', e.target.value)} />
+                  <label className="form-label">Tu ubicación <span style={{ color: 'var(--red)', fontWeight: 700 }}>*</span></label>
+                  {form.latitude ? (
+                    <div style={{ background: 'var(--green-dim)', border: '1px solid rgba(22,163,74,0.25)', borderRadius: 'var(--radius)', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ fontSize: 20 }}>✅</span>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--green)' }}>Ubicación detectada</p>
+                        <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 1 }}>{form.location || 'Coordenadas guardadas'}</p>
+                      </div>
+                    </div>
+                  ) : form.locationDenied ? (
+                    <div style={{ background: 'var(--bg-3)', border: '1px solid var(--border-2)', borderRadius: 'var(--radius)', padding: '12px 14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                        <span style={{ fontSize: 16 }}>⚠️</span>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--red)' }}>Ubicación requerida</p>
+                      </div>
+                      <p style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.5, marginBottom: 8 }}>
+                        Necesitamos tu ubicación para mostrarte rutas y eventos cerca de ti. Activa el permiso en tu navegador:
+                      </p>
+                      <p style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.6 }}>
+                        <strong>iPhone:</strong> Ajustes → Safari → Ubicación → Permitir<br />
+                        <strong>Android:</strong> Ajustes del navegador → Permisos → Ubicación
+                      </p>
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm btn-full"
+                        style={{ marginTop: 12 }}
+                        onClick={async () => {
+                          try {
+                            const pos = await new Promise((res, rej) =>
+                              navigator.geolocation.getCurrentPosition(res, rej, { timeout: 10000, enableHighAccuracy: true })
+                            )
+                            set('latitude', pos.coords.latitude)
+                            set('longitude', pos.coords.longitude)
+                            set('locationDenied', false)
+                            // Reverse geocode to get city name
+                            try {
+                              const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=es`)
+                              const geo = await resp.json()
+                              const city = geo.address?.city || geo.address?.town || geo.address?.village || geo.address?.municipality || ''
+                              if (city) set('location', city)
+                            } catch {}
+                          } catch {
+                            set('locationDenied', true)
+                          }
+                        }}
+                      >
+                        🔄 Reintentar
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{ background: 'var(--bg-3)', borderRadius: 'var(--radius)', padding: '14px', display: 'flex', alignItems: 'center', gap: 10 }}>
+                      <span style={{ fontSize: 20 }}>📍</span>
+                      <div style={{ flex: 1 }}>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>Activa tu ubicación</p>
+                        <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 1 }}>Obligatorio para ver rutas en tu zona</p>
+                      </div>
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={async () => {
+                          try {
+                            const pos = await new Promise((res, rej) =>
+                              navigator.geolocation.getCurrentPosition(res, rej, { timeout: 10000, enableHighAccuracy: true })
+                            )
+                            set('latitude', pos.coords.latitude)
+                            set('longitude', pos.coords.longitude)
+                            set('locationDenied', false)
+                            // Reverse geocode to get city name
+                            try {
+                              const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=es`)
+                              const geo = await resp.json()
+                              const city = geo.address?.city || geo.address?.town || geo.address?.village || geo.address?.municipality || ''
+                              if (city) set('location', city)
+                            } catch {}
+                          } catch {
+                            set('locationDenied', true)
+                          }
+                        }}
+                      >
+                        Activar
+                      </button>
+                    </div>
+                  )}
                   {errors.location && <span className="form-error">{errors.location}</span>}
-                  <span className="form-hint">Si estás en el área de Barcelona, puedes optar a acceso gratuito</span>
+                  <span className="form-hint">Usamos GPS para mostrarte eventos cerca de ti. Si estás en el área de Barcelona, acceso gratuito.</span>
                 </div>
                 <div className="form-group">
                   <label className="form-label">Nivel de experiencia</label>
@@ -597,66 +678,6 @@ export default function AuthPage() {
             {/* Step 3 — Preferences */}
             {step === 3 && (
               <form onSubmit={handleRegister} className="stack">
-                {/* Location permission request */}
-                {form.latitude ? (
-                  // Success state
-                  <div style={{ background: 'var(--green-dim)', border: '1px solid rgba(22,163,74,0.25)', borderRadius: 'var(--radius)', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: 20 }}>✅</span>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--green)' }}>Ubicación guardada</p>
-                      <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 1 }}>Recibirás alertas de rutas cerca de ti</p>
-                    </div>
-                    <button type="button" className="btn btn-ghost btn-sm" onClick={() => { set('latitude', null); set('longitude', null) }}>
-                      Quitar
-                    </button>
-                  </div>
-                ) : form.locationDenied ? (
-                  // Denied state — show instructions instead of a toast
-                  <div style={{ background: 'var(--bg-3)', border: '1px solid var(--border-2)', borderRadius: 'var(--radius)', padding: '12px 14px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                      <span style={{ fontSize: 16 }}>📍</span>
-                      <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>Ubicación bloqueada</p>
-                    </div>
-                    <p style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.5, marginBottom: 8 }}>
-                      Tu navegador tiene el permiso bloqueado. Para activarlo:
-                    </p>
-                    <p style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.6 }}>
-                      <strong>iPhone:</strong> Ajustes → Safari → Ubicación → Permitir<br />
-                      <strong>Android:</strong> Ajustes del navegador → Permisos → Ubicación
-                    </p>
-                    <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 8 }}>
-                      No es obligatorio — puedes continuar sin ubicación.
-                    </p>
-                  </div>
-                ) : (
-                  // Default state
-                  <div style={{ background: 'var(--bg-3)', borderRadius: 'var(--radius)', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: 20 }}>📍</span>
-                    <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>Ubicación <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>(opcional)</span></p>
-                      <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 1 }}>Mejora la precisión para el acceso gratuito</p>
-                    </div>
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-sm"
-                      onClick={async () => {
-                        try {
-                          const pos = await new Promise((res, rej) =>
-                            navigator.geolocation.getCurrentPosition(res, rej, { timeout: 8000, enableHighAccuracy: true })
-                          )
-                          set('latitude', pos.coords.latitude)
-                          set('longitude', pos.coords.longitude)
-                          set('locationDenied', false)
-                        } catch (err) {
-                          set('locationDenied', true)
-                        }
-                      }}
-                    >
-                      Permitir
-                    </button>
-                  </div>
-                )}
-
                 {/* Instagram */}
                 <div className="form-group">
                   <label className="form-label">Instagram <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>(opcional)</span></label>

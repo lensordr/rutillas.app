@@ -13,6 +13,7 @@ import { ForgotPasswordPage, ResetPasswordPage, ConfirmEmailPage } from './pages
 import NotificationsPage from './pages/NotificationsPage'
 import ProfilePage from './pages/ProfilePage'
 import AdminPage from './pages/AdminPage'
+import UserListPage from './pages/UserListPage'
 
 // Error boundary to catch React crashes
 class ErrorBoundary extends Component {
@@ -136,6 +137,16 @@ export default function App() {
           element={
             <ProtectedRoute>
               <ChatPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
+                <UserListPage />
+              </AppLayout>
             </ProtectedRoute>
           }
         />

@@ -146,6 +146,15 @@ const useStore = create(
         }
       },
 
+      inviteToRoute: async (routeId, userId) => {
+        try {
+          await api.inviteToRoute(routeId, userId)
+          return { ok: true }
+        } catch (e) {
+          return { error: e.data?.error || 'Error al invitar' }
+        }
+      },
+
       // ── Participants ──────────────────────────────────────────────────────
       participants: {},  // { routeId: [...] }
 
@@ -234,12 +243,78 @@ const useStore = create(
         return get().notifications.filter((n) => !n.read).length
       },
 
+      deleteNotification: async (id) => {
+        // Optimistic removal
+        set((s) => ({
+          notifications: s.notifications.filter((n) => n.id !== id)
+        }))
+        try {
+          await api.deleteNotification(id)
+          return { ok: true }
+        } catch (e) {
+          // Re-fetch on error (can't easily revert)
+          try {
+            const list = await api.getNotifications()
+            set({ notifications: list })
+          } catch {}
+          return { error: e.data?.error || 'Error al eliminar' }
+        }
+      },
+
+      // ── Users (Social) ──────────────────────────────────────────────────────
+      users: [],
+      usersLoading: false,
+
+      fetchUsers: async (city) => {
+        set({ usersLoading: true })
+        try {
+          const data = await api.getUsers(city)
+          set({ users: data.results || data, usersLoading: false })
+        } catch (e) {
+          set({ usersLoading: false })
+        }
+      },
+
+      followUser: async (userId) => {
+        // Optimistic update
+        set((s) => ({
+          users: s.users.map((u) => u.id === userId ? { ...u, is_followed: true, followers_count: (u.followers_count || 0) + 1 } : u)
+        }))
+        try {
+          await api.followUser(userId)
+          return { ok: true }
+        } catch (e) {
+          // Revert on error
+          set((s) => ({
+            users: s.users.map((u) => u.id === userId ? { ...u, is_followed: false, followers_count: (u.followers_count || 1) - 1 } : u)
+          }))
+          return { error: e.data?.error || 'Error al seguir' }
+        }
+      },
+
+      unfollowUser: async (userId) => {
+        // Optimistic update
+        set((s) => ({
+          users: s.users.map((u) => u.id === userId ? { ...u, is_followed: false, followers_count: Math.max(0, (u.followers_count || 1) - 1) } : u)
+        }))
+        try {
+          await api.unfollowUser(userId)
+          return { ok: true }
+        } catch (e) {
+          // Revert on error
+          set((s) => ({
+            users: s.users.map((u) => u.id === userId ? { ...u, is_followed: true, followers_count: (u.followers_count || 0) + 1 } : u)
+          }))
+          return { error: e.data?.error || 'Error al dejar de seguir' }
+        }
+      },
+
       // ── Admin users ───────────────────────────────────────────────────────
       adminUsers: [],
 
       fetchAdminUsers: async () => {
         try {
-          const users = await api.getUsers()
+          const users = await api.getAdminUsers()
           set({ adminUsers: users })
         } catch (e) {}
       },

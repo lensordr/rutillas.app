@@ -9,6 +9,7 @@ import {
   IconChat, IconSend, IconEdit, IconTrash
 } from '../components/Icons'
 import { useToast } from '../components/Toast'
+import InviteUsersModal from '../components/InviteUsersModal'
 
 const STATUS_LABELS = { upcoming: 'Próximo', active: 'En curso', full: 'Completo', ended: 'Finalizado' }
 
@@ -345,6 +346,7 @@ export default function EventDetailPage() {
   const [tab, setTab] = useState('info')
   const [joining, setJoining] = useState(false)
   const [showEdit, setShowEdit] = useState(false)
+  const [showInvite, setShowInvite] = useState(false)
   const [freshRoute, setFreshRoute] = useState(null)
   const toast = useToast()
 
@@ -491,6 +493,11 @@ export default function EventDetailPage() {
                   <IconChat size={18} /> Abrir chat de la ruta
                 </button>
               )}
+              {isCreator && route.status !== 'ended' && (
+                <button className="btn btn-ghost btn-full" onClick={() => setShowInvite(true)}>
+                  👥 Invitar usuarios
+                </button>
+              )}
               {(isCreator || isAdmin) && route.status !== 'ended' && (
                 <button className="btn btn-ghost btn-full" onClick={() => addToCalendar(route)}>
                   📅 Añadir al calendario
@@ -503,6 +510,7 @@ export default function EventDetailPage() {
       </div>
 
       {showEdit && <EditRouteModal route={route} onClose={() => setShowEdit(false)} onDelete={() => { navigate('/events'); useStore.getState().deleteRoute(route.id) }} />}
+      {showInvite && <InviteUsersModal routeId={route.id} onClose={() => setShowInvite(false)} />}
     </div>
   )
 }

@@ -66,8 +66,21 @@ export const api = {
   forgotPassword: (email) => request('POST', '/auth/forgot-password/', { email }, false),
   resetPassword: (token, password) => request('POST', '/auth/reset-password/', { token, password }, false),
 
+  // Users
+  getUsers: (city) => request('GET', `/users/${city ? `?city=${city}` : ''}`),
+
+  // Follow
+  followUser: (userId) => request('POST', `/follow/${userId}/`),
+  unfollowUser: (userId) => request('DELETE', `/unfollow/${userId}/`),
+
+  // Route invitation
+  inviteToRoute: (routeId, userId) => request('POST', `/routes/${routeId}/invite/`, { user_id: userId }),
+
+  // Delete notification
+  deleteNotification: (id) => request('DELETE', `/notifications/${id}/`),
+
   // Admin
-  getUsers: () => request('GET', '/admin/users/'),
+  getAdminUsers: () => request('GET', '/admin/users/'),
   updateUser: (id, data) => request('PATCH', `/admin/users/${id}/`, data),
   deleteUser: (id) => request('DELETE', `/admin/users/${id}/`),
 }

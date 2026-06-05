@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 import useStore from '../store/useStore'
-import { IconBell, IconCheck } from '../components/Icons'
+import { IconBell, IconCheck, IconTrash } from '../components/Icons'
 
 function NotifIcon({ type }) {
   const icons = { join_request: '🏍️', approved: '✅', rejected: '❌', new_message: '💬' }
@@ -75,9 +75,21 @@ export default function NotificationsPage() {
                   {formatDistanceToNow(new Date(notif.created_at), { addSuffix: true, locale: es })}
                 </p>
               </div>
-              {!notif.read && (
-                <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)', flexShrink: 0, marginTop: 6 }} />
-              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                {!notif.read && (
+                  <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--accent)' }} />
+                )}
+                <button
+                  onClick={(e) => { e.stopPropagation(); useStore.getState().deleteNotification(notif.id) }}
+                  style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', color: 'var(--text-3)', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: notif.read ? 0.7 : 0.4, transition: 'opacity 0.15s, color 0.15s' }}
+                  onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = 'var(--accent)' }}
+                  onMouseLeave={(e) => { e.currentTarget.style.opacity = notif.read ? '0.7' : '0.4'; e.currentTarget.style.color = 'var(--text-3)' }}
+                  title="Eliminar notificación"
+                  aria-label="Eliminar notificación"
+                >
+                  <IconTrash size={15} />
+                </button>
+              </div>
             </div>
           ))
         )}

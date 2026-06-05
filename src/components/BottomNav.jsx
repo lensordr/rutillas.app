@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { IconCalendar, IconBell, IconUser, IconShield } from './Icons'
+import { IconCalendar, IconBell, IconUser, IconUsers, IconShield } from './Icons'
 import useStore from '../store/useStore'
 
 const IconMail = ({ size = 22 }) => (
@@ -24,6 +24,16 @@ export default function BottomNav() {
               {isActive && <span className="nav-active-dot" />}
               <IconCalendar />
               Rutas
+            </>
+          )}
+        </NavLink>
+
+        <NavLink to="/users" className={({ isActive }) => `nav-item${isActive ? ' active' : ''}`}>
+          {({ isActive }) => (
+            <>
+              {isActive && <span className="nav-active-dot" />}
+              <IconUsers />
+              Riders
             </>
           )}
         </NavLink>
