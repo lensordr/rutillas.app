@@ -10,6 +10,7 @@ import {
 } from '../components/Icons'
 import { useToast } from '../components/Toast'
 import InviteUsersModal from '../components/InviteUsersModal'
+import { useT } from '../i18n/useT'
 
 const STATUS_LABELS = { upcoming: 'Próximo', active: 'En curso', full: 'Completo', ended: 'Finalizado' }
 
@@ -46,17 +47,18 @@ function addToCalendar(route) {
 
 // ─── Photos Tab ───────────────────────────────────────────────────────────────
 function PhotosTab({ route }) {
+  const t = useT()
   return (
     <div style={{ padding: '24px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', gap: 12 }}>
       <div style={{ fontSize: 48 }}>📸</div>
       <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 22, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-        Próximamente
+        {t('routes.photos.title')}
       </p>
       <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.6, maxWidth: 280 }}>
-        Pronto podrás compartir fotos de tus rutas directamente en la app.
+        {t('routes.photos.desc')}
       </p>
       <div style={{ background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', borderRadius: 'var(--radius-lg)', padding: '10px 20px', marginTop: 8 }}>
-        <p style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 700 }}>🚀 Coming soon</p>
+        <p style={{ fontSize: 13, color: 'var(--accent)', fontWeight: 700 }}>{t('routes.photos.comingSoon')}</p>
       </div>
     </div>
   )
@@ -65,6 +67,7 @@ function PhotosTab({ route }) {
 // ─── Edit Route Modal ─────────────────────────────────────────────────────────
 function EditRouteModal({ route, onClose, onDelete }) {
   const toast = useToast()
+  const t = useT()
   const [saving, setSaving] = useState(false)
   const [confirmDel, setConfirmDel] = useState(false)
   const toLocal = (iso) => {
@@ -87,42 +90,42 @@ function EditRouteModal({ route, onClose, onDelete }) {
     const result = await useStore.getState().updateRoute(route.id, data)
     setSaving(false)
     if (result?.error) { toast(result.error, 'error'); return }
-    toast('Ruta actualizada ✓', 'success')
+    toast(t('admin.routeUpdated'), 'success')
     onClose()
   }
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-handle" />
-        <h2 className="modal-title">Editar ruta</h2>
+        <h2 className="modal-title">{t('routes.edit.title')}</h2>
         {confirmDel ? (
           <div className="stack">
-            <p style={{ fontSize: 15, color: 'var(--text-2)' }}>¿Eliminar <strong>"{route.title}"</strong>?</p>
+            <p style={{ fontSize: 15, color: 'var(--text-2)' }}>{t('routes.edit.confirmDelete', { title: route.title })}</p>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setConfirmDel(false)}>Cancelar</button>
-              <button className="btn btn-danger" style={{ flex: 1 }} onClick={onDelete}><IconTrash size={16} /> Eliminar</button>
+              <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setConfirmDel(false)}>{t('common.cancel')}</button>
+              <button className="btn btn-danger" style={{ flex: 1 }} onClick={onDelete}><IconTrash size={16} /> {t('routes.edit.delete')}</button>
             </div>
           </div>
         ) : (
           <form onSubmit={handleSave} className="stack">
-            <div className="form-group"><label className="form-label">Título</label><input className="form-input" value={form.title} onChange={e => set('title', e.target.value)} /></div>
-            <div className="form-group"><label className="form-label">Descripción</label><textarea className="form-textarea" value={form.description} onChange={e => set('description', e.target.value)} /></div>
+            <div className="form-group"><label className="form-label">{t('routes.create.titleLabel')}</label><input className="form-input" value={form.title} onChange={e => set('title', e.target.value)} /></div>
+            <div className="form-group"><label className="form-label">{t('routes.create.description')}</label><textarea className="form-textarea" value={form.description} onChange={e => set('description', e.target.value)} /></div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <div className="form-group"><label className="form-label">Ciudad</label><input className="form-input" value={form.city} onChange={e => set('city', e.target.value)} /></div>
-              <div className="form-group"><label className="form-label">Detalle</label><input className="form-input" value={form.location_detail} onChange={e => set('location_detail', e.target.value)} /></div>
+              <div className="form-group"><label className="form-label">{t('routes.create.city')}</label><input className="form-input" value={form.city} onChange={e => set('city', e.target.value)} /></div>
+              <div className="form-group"><label className="form-label">{t('routes.create.locationDetail')}</label><input className="form-input" value={form.location_detail} onChange={e => set('location_detail', e.target.value)} /></div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <div className="form-group"><label className="form-label">Inicio</label><input className="form-input" type="datetime-local" value={form.date} onChange={e => set('date', e.target.value)} /></div>
-              <div className="form-group"><label className="form-label">Fin</label><input className="form-input" type="datetime-local" value={form.end_date} onChange={e => set('end_date', e.target.value)} /></div>
+              <div className="form-group"><label className="form-label">{t('routes.create.startDate')}</label><input className="form-input" type="datetime-local" value={form.date} onChange={e => set('date', e.target.value)} /></div>
+              <div className="form-group"><label className="form-label">{t('routes.create.endDate')}</label><input className="form-input" type="datetime-local" value={form.end_date} onChange={e => set('end_date', e.target.value)} /></div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              <div className="form-group"><label className="form-label">Máx. riders</label><input className="form-input" type="number" min="2" max="200" value={form.max_participants} onChange={e => set('max_participants', e.target.value)} /></div>
-              <div className="form-group"><label className="form-label">Google Maps</label><input className="form-input" type="url" value={form.route_url} onChange={e => set('route_url', e.target.value)} /></div>
+              <div className="form-group"><label className="form-label">{t('routes.create.maxRiders')}</label><input className="form-input" type="number" min="2" max="200" value={form.max_participants} onChange={e => set('max_participants', e.target.value)} /></div>
+              <div className="form-group"><label className="form-label">{t('routes.create.googleMaps')}</label><input className="form-input" type="url" value={form.route_url} onChange={e => set('route_url', e.target.value)} /></div>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <button type="button" className="btn btn-danger btn-sm" onClick={() => setConfirmDel(true)}><IconTrash size={14} /></button>
-              <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={onClose}>Cancelar</button>
-              <button type="submit" className="btn btn-primary" style={{ flex: 2 }} disabled={saving}>{saving ? <span className="spinner" /> : 'Guardar'}</button>
+              <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={onClose}>{t('common.cancel')}</button>
+              <button type="submit" className="btn btn-primary" style={{ flex: 2 }} disabled={saving}>{saving ? <span className="spinner" /> : t('routes.edit.save')}</button>
             </div>
           </form>
         )}
@@ -136,6 +139,7 @@ export function ChatPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const routeId = Number(id)
+  const t = useT()
 
   // Only subscribe to data, never to actions
   const currentUser = useStore((s) => s.currentUser)
@@ -247,9 +251,9 @@ export function ChatPage() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', height: '100dvh', alignItems: 'center', justifyContent: 'center', padding: 32, textAlign: 'center', background: 'var(--bg)' }}>
         <div style={{ fontSize: 48, marginBottom: 16 }}>🔒</div>
-        <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 22, fontWeight: 900, textTransform: 'uppercase', marginBottom: 8 }}>Acceso restringido</p>
-        <p style={{ fontSize: 14, color: 'var(--text-2)', marginBottom: 24 }}>Necesitas ser aceptado en la ruta para acceder al chat.</p>
-        <button className="btn btn-primary" onClick={() => navigate(`/events/${id}`)}>Ver la ruta</button>
+        <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 22, fontWeight: 900, textTransform: 'uppercase', marginBottom: 8 }}>{t('chat.accessDenied')}</p>
+        <p style={{ fontSize: 14, color: 'var(--text-2)', marginBottom: 24 }}>{t('chat.accessDeniedDesc')}</p>
+        <button className="btn btn-primary" onClick={() => navigate(`/events/${id}`)}>{t('chat.viewRoute')}</button>
       </div>
     )
   }
@@ -264,9 +268,9 @@ export function ChatPage() {
         </button>
         <div style={{ flex: 1 }}>
           <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 18, fontWeight: 900, textTransform: 'uppercase' }}>
-            {routeTitle || 'Chat'}
+            {routeTitle || t('chat.title')}
           </p>
-          <p style={{ fontSize: 11, color: 'var(--text-3)' }}>Chat de la ruta</p>
+          <p style={{ fontSize: 11, color: 'var(--text-3)' }}>{t('chat.subtitle')}</p>
         </div>
         {isRouteActive && <span className="live-dot" />}
       </div>
@@ -281,8 +285,8 @@ export function ChatPage() {
         {loaded && (messages?.length ?? 0) === 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, gap: 8, color: 'var(--text-3)', paddingTop: 60 }}>
             <IconChat size={40} />
-            <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 18, fontWeight: 700, textTransform: 'uppercase' }}>Sin mensajes aún</p>
-            <p style={{ fontSize: 13 }}>Sé el primero en escribir</p>
+            <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 18, fontWeight: 700, textTransform: 'uppercase' }}>{t('chat.empty')}</p>
+            <p style={{ fontSize: 13 }}>{t('chat.emptyHint')}</p>
           </div>
         )}
         {(messages ?? []).map((msg) => {
@@ -308,13 +312,13 @@ export function ChatPage() {
       {/* Input bar */}
       {!chatOpen ? (
         <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', background: 'var(--bg-2)', textAlign: 'center' }}>
-          <p style={{ fontSize: 13, color: 'var(--text-3)' }}>El chat de esta ruta está cerrado</p>
+          <p style={{ fontSize: 13, color: 'var(--text-3)' }}>{t('chat.closed')}</p>
         </div>
       ) : (
         <div style={{ display: 'flex', gap: 8, padding: '10px 16px', paddingBottom: 'calc(10px + var(--safe-bottom))', borderTop: '1px solid var(--border)', background: 'var(--bg-2)', flexShrink: 0, alignItems: 'flex-end' }}>
           <textarea
             className="chat-input"
-            placeholder="Escribe un mensaje..."
+            placeholder={t('chat.placeholder')}
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
@@ -349,6 +353,7 @@ export default function EventDetailPage() {
   const [showInvite, setShowInvite] = useState(false)
   const [freshRoute, setFreshRoute] = useState(null)
   const toast = useToast()
+  const t = useT()
 
   useEffect(() => {
     const load = async () => {
@@ -382,16 +387,16 @@ export default function EventDetailPage() {
         </div>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 24px', textAlign: 'center' }}>
           <div style={{ fontSize: 48, marginBottom: 16 }}>🔒</div>
-          <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 28, fontWeight: 900, textTransform: 'uppercase', marginBottom: 8 }}>Contenido exclusivo</h2>
-          <p style={{ fontSize: 15, color: 'var(--text-2)', marginBottom: 8, lineHeight: 1.6 }}>Suscríbete para ver la ubicación, detalles y unirte al chat.</p>
+          <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 28, fontWeight: 900, textTransform: 'uppercase', marginBottom: 8 }}>{t('routes.detail.exclusive')}</h2>
+          <p style={{ fontSize: 15, color: 'var(--text-2)', marginBottom: 8, lineHeight: 1.6 }}>{t('routes.detail.exclusiveDesc')}</p>
           <div style={{ background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', borderRadius: 'var(--radius-lg)', padding: '12px 20px', marginBottom: 24 }}>
-            <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 32, fontWeight: 900, color: 'var(--accent)' }}>3,99€ <span style={{ fontSize: 16, fontWeight: 600 }}>/mes</span></p>
-            <p style={{ fontSize: 12, color: 'var(--text-2)', marginTop: 2 }}>Acceso completo · Cancela cuando quieras</p>
+            <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 32, fontWeight: 900, color: 'var(--accent)' }}>{t('routes.create.price')} <span style={{ fontSize: 16, fontWeight: 600 }}>{t('routes.create.priceUnit')}</span></p>
+            <p style={{ fontSize: 12, color: 'var(--text-2)', marginTop: 2 }}>{t('routes.create.priceDesc')}</p>
           </div>
           <a href="https://square.link/u/4AiXGpLe" target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-lg" style={{ textDecoration: 'none', marginBottom: 12, width: '100%', maxWidth: 280 }}>
-            🏍️ Suscribirse — 3,99€/mes
+            {t('routes.detail.subscribeBtn')}
           </a>
-          <button className="btn btn-ghost btn-sm" onClick={() => navigate(-1)}>Volver</button>
+          <button className="btn btn-ghost btn-sm" onClick={() => navigate(-1)}>{t('routes.detail.back')}</button>
         </div>
       </div>
     )
@@ -407,21 +412,21 @@ export default function EventDetailPage() {
     const result = await useStore.getState().joinRoute(route.id)
     setJoining(false)
     if (result?.error === 'subscription_required') {
-      toast('Necesitas suscripción para unirte', 'error')
+      toast(t('routes.join.subscriptionNeeded'), 'error')
       setTimeout(() => window.open(result.payment_url, '_blank'), 800)
     } else if (result?.error) {
       toast(result.error, 'error')
     } else if (result?.status === 'approved') {
-      toast('¡Unido! Ya tienes acceso al chat 🏍️', 'success')
+      toast(t('routes.join.success'), 'success')
       try { const fresh = await api.getRoute(parseInt(route.id)); setFreshRoute(fresh) } catch (e) {}
     } else {
-      toast('Solicitud enviada ✓', 'success')
+      toast(t('routes.join.requestSent'), 'success')
     }
   }
 
   const tabs = [
-    { key: 'info', label: 'Info' },
-    ...(canPhotos ? [{ key: 'photos', label: 'Fotos' }] : []),
+    { key: 'info', label: t('routes.detail.tabInfo') },
+    ...(canPhotos ? [{ key: 'photos', label: t('routes.detail.tabPhotos') }] : []),
   ]
 
   return (
@@ -431,24 +436,24 @@ export default function EventDetailPage() {
         <button className="btn btn-ghost btn-icon" onClick={() => navigate(-1)}><IconBack /></button>
         <h1 style={{ flex: 1, fontFamily: "'Barlow Condensed', sans-serif", fontSize: 20, fontWeight: 900, textTransform: 'uppercase', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{route.title}</h1>
         {(isCreator || isAdmin) && <button className="btn btn-ghost btn-icon" onClick={() => setShowEdit(true)}><IconEdit size={18} /></button>}
-        <span className={`badge badge-${route.status}`}>{route.status === 'active' ? <><span className="live-dot" style={{ width: 6, height: 6 }} /> En curso</> : STATUS_LABELS[route.status]}</span>
+        <span className={`badge badge-${route.status}`}>{route.status === 'active' ? <><span className="live-dot" style={{ width: 6, height: 6 }} /> {t('routes.status.active')}</> : STATUS_LABELS[route.status]}</span>
       </div>
 
       {/* Tab bar */}
       <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', background: 'var(--bg)', padding: '0 16px', flexShrink: 0 }}>
-        {tabs.map((t) => (
-          <button key={t.key} onClick={() => {
-            if (t.key === 'chat') { navigate(`/events/${id}/chat`); return }
-            setTab(t.key)
+        {tabs.map((tabItem) => (
+          <button key={tabItem.key} onClick={() => {
+            if (tabItem.key === 'chat') { navigate(`/events/${id}/chat`); return }
+            setTab(tabItem.key)
           }} style={{
             padding: '12px 16px', border: 'none', background: 'transparent',
-            color: tab === t.key ? 'var(--accent)' : 'var(--text-3)',
+            color: tab === tabItem.key ? 'var(--accent)' : 'var(--text-3)',
             fontFamily: "'Barlow Condensed', sans-serif", fontSize: 14, fontWeight: 700,
             letterSpacing: '0.06em', textTransform: 'uppercase', cursor: 'pointer',
-            borderBottom: tab === t.key ? '2px solid var(--accent)' : '2px solid transparent',
+            borderBottom: tab === tabItem.key ? '2px solid var(--accent)' : '2px solid transparent',
             marginBottom: -1,
           }}>
-            {t.label}
+            {tabItem.label}
           </button>
         ))}
       </div>
@@ -468,39 +473,39 @@ export default function EventDetailPage() {
                   <div className="event-card-info-row" style={{ fontSize: 14 }}><IconClock size={16} /><span>{format(new Date(route.date), "EEEE d 'de' MMMM yyyy · HH:mm", { locale: es })}</span></div>
                   <div className="event-card-info-row" style={{ fontSize: 14 }}><IconMapPin size={16} /><span>{route.city}{route.location_detail ? ` — ${route.location_detail}` : ''}</span></div>
                   <div className="event-card-info-row" style={{ fontSize: 14 }}><IconUsers size={16} /><span>{route.approved_count} / {route.max_participants} riders</span></div>
-                  {route.route_url && <div className="event-card-info-row" style={{ fontSize: 14 }}><IconLink size={16} /><a href={route.route_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none' }}>Ver ruta en Google Maps</a></div>}
+                  {route.route_url && <div className="event-card-info-row" style={{ fontSize: 14 }}><IconLink size={16} /><a href={route.route_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', textDecoration: 'none' }}>{t('routes.detail.viewGoogleMaps')}</a></div>}
                 </div>
               </div>
               {route.description && <div style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '14px 16px' }}><p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.6 }}>{route.description}</p></div>}
               {!isAdmin && (
                 <div style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '14px 16px' }}>
-                  {!userStatus && route.status !== 'ended' && <button className="btn btn-primary btn-full btn-lg" onClick={handleJoin} disabled={joining}>{joining ? <span className="spinner" /> : 'Unirse a la ruta'}</button>}
-                  {userStatus === 'pending' && <div style={{ textAlign: 'center' }}><span className="badge badge-pending" style={{ fontSize: 13, padding: '6px 14px' }}>Solicitud pendiente</span></div>}
+                  {!userStatus && route.status !== 'ended' && <button className="btn btn-primary btn-full btn-lg" onClick={handleJoin} disabled={joining}>{joining ? <span className="spinner" /> : t('routes.detail.joinBtn')}</button>}
+                  {userStatus === 'pending' && <div style={{ textAlign: 'center' }}><span className="badge badge-pending" style={{ fontSize: 13, padding: '6px 14px' }}>{t('routes.detail.pending')}</span></div>}
                   {userStatus === 'approved' && (
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-                      <span className="badge badge-approved" style={{ fontSize: 13, padding: '6px 14px' }}>✓ Aceptado</span>
+                      <span className="badge badge-approved" style={{ fontSize: 13, padding: '6px 14px' }}>{t('routes.detail.approved')}</span>
                       <button className="btn btn-ghost btn-sm" onClick={() => addToCalendar(route)}>
-                        📅 Añadir al calendario
+                        {t('routes.detail.addCalendar')}
                       </button>
                     </div>
                   )}
-                  {userStatus === 'rejected' && <div style={{ textAlign: 'center' }}><span className="badge badge-rejected" style={{ fontSize: 13, padding: '6px 14px' }}>Solicitud rechazada</span></div>}
-                  {route.status === 'ended' && !userStatus && <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-3)' }}>Esta ruta ha finalizado</p>}
+                  {userStatus === 'rejected' && <div style={{ textAlign: 'center' }}><span className="badge badge-rejected" style={{ fontSize: 13, padding: '6px 14px' }}>{t('routes.detail.rejected')}</span></div>}
+                  {route.status === 'ended' && !userStatus && <p style={{ textAlign: 'center', fontSize: 13, color: 'var(--text-3)' }}>{t('routes.detail.ended')}</p>}
                 </div>
               )}
               {canChat && (
                 <button className="btn btn-secondary btn-full" onClick={() => navigate(`/events/${id}/chat`)}>
-                  <IconChat size={18} /> Abrir chat de la ruta
+                  <IconChat size={18} /> {t('routes.detail.openChat')}
                 </button>
               )}
               {isCreator && route.status !== 'ended' && (
                 <button className="btn btn-ghost btn-full" onClick={() => setShowInvite(true)}>
-                  👥 Invitar usuarios
+                  {t('routes.detail.inviteUsers')}
                 </button>
               )}
               {(isCreator || isAdmin) && route.status !== 'ended' && (
                 <button className="btn btn-ghost btn-full" onClick={() => addToCalendar(route)}>
-                  📅 Añadir al calendario
+                  {t('routes.detail.addCalendar')}
                 </button>
               )}
             </div>

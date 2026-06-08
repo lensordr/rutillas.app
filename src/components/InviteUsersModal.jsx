@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { api } from '../api'
 import useStore from '../store/useStore'
 import { IconMapPin } from './Icons'
+import { useT } from '../i18n/useT'
 
 export default function InviteUsersModal({ routeId, onClose }) {
   const [users, setUsers] = useState([])
@@ -11,6 +12,7 @@ export default function InviteUsersModal({ routeId, onClose }) {
   const [errorMap, setErrorMap] = useState({})     // { userId: errorMessage }
 
   const currentUser = useStore((s) => s.currentUser)
+  const t = useT()
 
   useEffect(() => {
     loadUsers()
@@ -57,14 +59,14 @@ export default function InviteUsersModal({ routeId, onClose }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
         <div className="modal-handle" />
-        <h2 className="modal-title">Invitar usuarios</h2>
+        <h2 className="modal-title">{t('routes.detail.inviteUsers')}</h2>
 
         {/* Search input */}
         <div style={{ padding: '0 0 12px' }}>
           <input
             className="form-input"
             type="text"
-            placeholder="Buscar por ciudad..."
+            placeholder={t('routes.cityFilter.search')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             autoFocus
@@ -81,7 +83,7 @@ export default function InviteUsersModal({ routeId, onClose }) {
 
           {!loading && users.length === 0 && (
             <p style={{ textAlign: 'center', fontSize: 14, color: 'var(--text-3)', padding: 24 }}>
-              No se encontraron usuarios
+              {t('users.empty')}
             </p>
           )}
 
@@ -157,7 +159,7 @@ export default function InviteUsersModal({ routeId, onClose }) {
 
         {/* Close button */}
         <div style={{ paddingTop: 12 }}>
-          <button className="btn btn-ghost btn-full" onClick={onClose}>Cerrar</button>
+          <button className="btn btn-ghost btn-full" onClick={onClose}>{t('common.close')}</button>
         </div>
       </div>
     </div>

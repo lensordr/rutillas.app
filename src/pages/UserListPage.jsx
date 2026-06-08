@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import useStore from '../store/useStore'
 import { IconUsers } from '../components/Icons'
 import UserCard from '../components/UserCard'
+import { useT } from '../i18n/useT'
 
 export default function UserListPage() {
   const users = useStore((s) => s.users)
@@ -9,6 +10,7 @@ export default function UserListPage() {
   const [citySearch, setCitySearch] = useState('')
   const [showCityFilter, setShowCityFilter] = useState(false)
   const debounceRef = useRef(null)
+  const t = useT()
 
   // Fetch on mount
   useEffect(() => {
@@ -46,7 +48,7 @@ export default function UserListPage() {
               textTransform: 'uppercase',
               letterSpacing: '0.04em',
             }}>
-              Riders
+              {t('users.title')}
             </h1>
             {citySearch && (
               <span style={{
@@ -63,7 +65,7 @@ export default function UserListPage() {
             )}
           </div>
           <button className="btn btn-ghost btn-sm" onClick={() => setShowCityFilter(true)}>
-            🗺️ Ciudad
+            🗺️ {t('users.city')}
           </button>
         </div>
         <div style={{ paddingBottom: 10 }} />
@@ -78,10 +80,10 @@ export default function UserListPage() {
         {!usersLoading && users.length === 0 && (
           <div className="empty-state">
             <IconUsers size={48} />
-            <p className="empty-state-title">No se encontraron riders</p>
+            <p className="empty-state-title">{t('users.empty')}</p>
             {citySearch && (
               <p style={{ fontSize: 13, color: 'var(--text-3)', marginTop: 4 }}>
-                Prueba con otra ciudad
+                {t('users.emptyCity')}
               </p>
             )}
           </div>
@@ -105,14 +107,14 @@ export default function UserListPage() {
         <div className="modal-overlay" onClick={() => setShowCityFilter(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-handle" />
-            <h2 className="modal-title">Filtrar por ciudad</h2>
+            <h2 className="modal-title">{t('routes.cityFilter.title')}</h2>
 
             {/* Search input */}
             <div style={{ position: 'relative', marginBottom: 16 }}>
               <input
                 className="form-input"
                 type="text"
-                placeholder="🔍 Escribe una ciudad..."
+                placeholder={t('routes.cityFilter.search')}
                 value={citySearch}
                 onChange={(e) => setCitySearch(e.target.value)}
                 style={{ borderRadius: 100 }}
@@ -132,7 +134,7 @@ export default function UserListPage() {
             </div>
 
             {/* Popular cities */}
-            <p className="section-title" style={{ marginBottom: 8 }}>Ciudades populares</p>
+            <p className="section-title" style={{ marginBottom: 8 }}>{t('routes.cityFilter.popular')}</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
               {['Barcelona', 'Madrid', 'Valencia', 'Sevilla', 'Málaga', 'Bilbao', 'Zaragoza', 'Girona', 'Tarragona', 'Lleida', 'Murcia', 'Alicante'].map((city) => (
                 <button key={city} onClick={() => { setCitySearch(city); setShowCityFilter(false) }} style={{
@@ -151,11 +153,11 @@ export default function UserListPage() {
             <div style={{ display: 'flex', gap: 8 }}>
               {citySearch && (
                 <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => { setCitySearch(''); setShowCityFilter(false) }}>
-                  Quitar filtro
+                  {t('routes.cityFilter.remove')}
                 </button>
               )}
               <button className="btn btn-primary" style={{ flex: 2 }} onClick={() => setShowCityFilter(false)}>
-                Aplicar
+                {t('routes.cityFilter.apply')}
               </button>
             </div>
           </div>

@@ -6,6 +6,7 @@ import useStore from '../store/useStore'
 import { IconPlus, IconEdit, IconTrash, IconCheck, IconX, IconUsers, IconShield, IconCalendar, IconSettings, IconLogout } from '../components/Icons'
 import { useToast } from '../components/Toast'
 import { api } from '../api'
+import { useT } from '../i18n/useT'
 
 const toLocal = (iso) => {
   if (!iso) return ''
@@ -17,6 +18,7 @@ const toLocal = (iso) => {
 // ─── Event Form Modal ─────────────────────────────────────────────────────────
 function EventFormModal({ event, onClose }) {
   const toast = useToast()
+  const t = useT()
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({
     title: event?.title || '',
@@ -33,11 +35,11 @@ function EventFormModal({ event, onClose }) {
 
   const validate = () => {
     const e = {}
-    if (!form.title.trim()) e.title = 'Requerido'
-    if (!form.date) e.date = 'Requerido'
-    if (!form.end_date) e.end_date = 'Requerido'
-    if (!form.city.trim()) e.city = 'Requerido'
-    if (form.date && form.end_date && new Date(form.end_date) <= new Date(form.date)) e.end_date = 'Debe ser posterior al inicio'
+    if (!form.title.trim()) e.title = t('validation.required')
+    if (!form.date) e.date = t('validation.required')
+    if (!form.end_date) e.end_date = t('validation.required')
+    if (!form.city.trim()) e.city = t('validation.required')
+    if (form.date && form.end_date && new Date(form.end_date) <= new Date(form.date)) e.end_date = t('validation.endDateAfterStart')
     setErrors(e)
     return !Object.keys(e).length
   }
@@ -50,7 +52,7 @@ function EventFormModal({ event, onClose }) {
     const result = event ? await useStore.getState().updateRoute(event.id, data) : await useStore.getState().createRoute(data)
     setSaving(false)
     if (result?.error) { toast(result.error, 'error'); return }
-    toast(event ? 'Ruta actualizada ✓' : 'Ruta creada 🏍️', 'success')
+    toast(event ? t('admin.routeUpdated') : t('admin.routeCreated'), 'success')
     onClose()
   }
 
@@ -58,50 +60,50 @@ function EventFormModal({ event, onClose }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-handle" />
-        <h2 className="modal-title">{event ? 'Editar ruta' : 'Nueva ruta'}</h2>
+        <h2 className="modal-title">{event ? t('routes.edit.title') : t('admin.newRoute')}</h2>
         <form onSubmit={handleSubmit} className="stack">
           <div className="form-group">
-            <label className="form-label">Título *</label>
-            <input className="form-input" value={form.title} onChange={e => set('title', e.target.value)} placeholder="Nombre de la ruta" />
+            <label className="form-label">{t('routes.create.titleLabel')}</label>
+            <input className="form-input" value={form.title} onChange={e => set('title', e.target.value)} placeholder={t('routes.create.titlePlaceholder')} />
             {errors.title && <span className="form-error">{errors.title}</span>}
           </div>
           <div className="form-group">
-            <label className="form-label">Descripción</label>
-            <textarea className="form-textarea" value={form.description} onChange={e => set('description', e.target.value)} placeholder="Describe la ruta..." />
+            <label className="form-label">{t('routes.create.description')}</label>
+            <textarea className="form-textarea" value={form.description} onChange={e => set('description', e.target.value)} placeholder={t('routes.create.descriptionPlaceholder')} />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div className="form-group">
-              <label className="form-label">Inicio *</label>
+              <label className="form-label">{t('routes.create.startDate')}</label>
               <input className="form-input" type="datetime-local" value={form.date} onChange={e => set('date', e.target.value)} />
               {errors.date && <span className="form-error">{errors.date}</span>}
             </div>
             <div className="form-group">
-              <label className="form-label">Fin *</label>
+              <label className="form-label">{t('routes.create.endDate')}</label>
               <input className="form-input" type="datetime-local" value={form.end_date} onChange={e => set('end_date', e.target.value)} />
               {errors.end_date && <span className="form-error">{errors.end_date}</span>}
             </div>
           </div>
           <div className="form-group">
-            <label className="form-label">Ciudad *</label>
-            <input className="form-input" value={form.city} onChange={e => set('city', e.target.value)} placeholder="Barcelona, Madrid..." />
+            <label className="form-label">{t('routes.create.city')}</label>
+            <input className="form-input" value={form.city} onChange={e => set('city', e.target.value)} placeholder={t('routes.create.cityPlaceholder')} />
             {errors.city && <span className="form-error">{errors.city}</span>}
           </div>
           <div className="form-group">
-            <label className="form-label">Detalle ubicación</label>
-            <input className="form-input" value={form.location_detail} onChange={e => set('location_detail', e.target.value)} placeholder="Punto de salida..." />
+            <label className="form-label">{t('routes.create.locationDetail')}</label>
+            <input className="form-input" value={form.location_detail} onChange={e => set('location_detail', e.target.value)} placeholder={t('routes.create.locationDetailPlaceholder')} />
           </div>
           <div className="form-group">
-            <label className="form-label">Ruta Google Maps</label>
-            <input className="form-input" type="url" value={form.route_url} onChange={e => set('route_url', e.target.value)} placeholder="https://maps.google.com/..." />
+            <label className="form-label">{t('routes.create.googleMaps')}</label>
+            <input className="form-input" type="url" value={form.route_url} onChange={e => set('route_url', e.target.value)} placeholder={t('routes.create.googleMapsPlaceholder')} />
           </div>
           <div className="form-group">
-            <label className="form-label">Máx. participantes</label>
+            <label className="form-label">{t('routes.create.maxRiders')}</label>
             <input className="form-input" type="number" min="1" max="500" value={form.max_participants} onChange={e => set('max_participants', e.target.value)} />
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-            <button type="button" className="btn btn-ghost" onClick={onClose} style={{ flex: 1 }}>Cancelar</button>
+            <button type="button" className="btn btn-ghost" onClick={onClose} style={{ flex: 1 }}>{t('common.cancel')}</button>
             <button type="submit" className="btn btn-primary" style={{ flex: 2 }} disabled={saving}>
-              {saving ? <span className="spinner" /> : event ? 'Guardar' : 'Crear ruta'}
+              {saving ? <span className="spinner" /> : event ? t('routes.edit.save') : t('routes.create.submit')}
             </button>
           </div>
         </form>
@@ -114,6 +116,7 @@ function EventFormModal({ event, onClose }) {
 function ParticipantsModal({ route, onClose }) {
   const participants = useStore((s) => s.participants[route.id] || [])
   const toast = useToast()
+  const t = useT()
 
   useEffect(() => { useStore.getState().fetchParticipants(route.id) }, [route.id])
 
@@ -125,7 +128,7 @@ function ParticipantsModal({ route, onClose }) {
   const handleAction = async (partId, status) => {
     const result = await useStore.getState().updateParticipant(route.id, partId, status)
     if (result?.error) toast(result.error, 'error')
-    else toast(status === 'approved' ? 'Aceptado ✓' : 'Rechazado', status === 'approved' ? 'success' : 'error')
+    else toast(status === 'approved' ? t('admin.participants.accepted') : t('admin.participants.rejected2'), status === 'approved' ? 'success' : 'error')
   }
 
   const Card = ({ p, actions }) => (
@@ -136,7 +139,7 @@ function ParticipantsModal({ route, onClose }) {
           <p style={{ fontWeight: 600, fontSize: 14 }}>{p.user?.first_name} {p.user?.last_name}</p>
           <p style={{ fontSize: 12, color: 'var(--text-3)' }}>{p.user?.email}</p>
         </div>
-        <span className={`badge badge-${p.status}`}>{p.status === 'pending' ? 'Pendiente' : p.status === 'approved' ? 'Aceptado' : 'Rechazado'}</span>
+        <span className={`badge badge-${p.status}`}>{p.status === 'pending' ? t('admin.participants.statusPending') : p.status === 'approved' ? t('admin.participants.statusApproved') : t('admin.participants.statusRejected')}</span>
       </div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: actions ? 10 : 0 }}>
         {p.user?.moto_model && <span style={{ fontSize: 11, background: 'var(--accent-dim)', borderRadius: 4, padding: '2px 7px', color: 'var(--accent)', fontWeight: 700 }}>🏍️ {p.user.moto_model}</span>}
@@ -148,10 +151,10 @@ function ParticipantsModal({ route, onClose }) {
       {actions && (
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="btn btn-sm" style={{ flex: 1, background: 'var(--green-dim)', color: 'var(--green)', border: '1px solid rgba(34,197,94,0.3)' }} onClick={() => handleAction(p.id, 'approved')}>
-            <IconCheck size={14} /> Aceptar
+            <IconCheck size={14} /> {t('admin.participants.accept')}
           </button>
           <button className="btn btn-danger btn-sm" style={{ flex: 1 }} onClick={() => handleAction(p.id, 'rejected')}>
-            <IconX size={14} /> Rechazar
+            <IconX size={14} /> {t('admin.participants.reject')}
           </button>
         </div>
       )}
@@ -162,12 +165,12 @@ function ParticipantsModal({ route, onClose }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-handle" />
-        <h2 className="modal-title">Riders — {route.title}</h2>
-        {pending.length > 0 && <><p className="section-title" style={{ marginBottom: 8 }}>Pendientes ({pending.length})</p>{pending.map(p => <Card key={p.id} p={p} actions />)}</>}
-        {approved.length > 0 && <><p className="section-title" style={{ marginBottom: 8, marginTop: 12 }}>Aceptados ({approved.length})</p>{approved.map(p => <Card key={p.id} p={p} actions={false} />)}</>}
-        {rejected.length > 0 && <><p className="section-title" style={{ marginBottom: 8, marginTop: 12 }}>Rechazados ({rejected.length})</p>{rejected.map(p => <Card key={p.id} p={p} actions={false} />)}</>}
-        {participants.length === 0 && <div className="empty-state" style={{ padding: '24px 0' }}><IconUsers size={36} /><p className="empty-state-title">Sin solicitudes</p></div>}
-        <button className="btn btn-ghost btn-full mt-8" onClick={onClose}>Cerrar</button>
+        <h2 className="modal-title">{t('admin.participants.title', { title: route.title })}</h2>
+        {pending.length > 0 && <><p className="section-title" style={{ marginBottom: 8 }}>{t('admin.participants.pending', { count: pending.length })}</p>{pending.map(p => <Card key={p.id} p={p} actions />)}</>}
+        {approved.length > 0 && <><p className="section-title" style={{ marginBottom: 8, marginTop: 12 }}>{t('admin.participants.approved', { count: approved.length })}</p>{approved.map(p => <Card key={p.id} p={p} actions={false} />)}</>}
+        {rejected.length > 0 && <><p className="section-title" style={{ marginBottom: 8, marginTop: 12 }}>{t('admin.participants.rejected', { count: rejected.length })}</p>{rejected.map(p => <Card key={p.id} p={p} actions={false} />)}</>}
+        {participants.length === 0 && <div className="empty-state" style={{ padding: '24px 0' }}><IconUsers size={36} /><p className="empty-state-title">{t('admin.noRequests')}</p></div>}
+        <button className="btn btn-ghost btn-full mt-8" onClick={onClose}>{t('admin.close')}</button>
       </div>
     </div>
   )
@@ -178,6 +181,7 @@ function SettingsModal({ onClose }) {
   const currentUser = useStore((s) => s.currentUser)
   const navigate = useNavigate()
   const toast = useToast()
+  const t = useT()
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({
     first_name: currentUser?.first_name || '',
@@ -195,7 +199,7 @@ function SettingsModal({ onClose }) {
     const result = await useStore.getState().updateCurrentUser(data)
     setSaving(false)
     if (result?.error) { toast(result.error, 'error'); return }
-    toast('Guardado ✓', 'success')
+    toast(t('admin.settings.saved'), 'success')
     onClose()
   }
 
@@ -206,32 +210,32 @@ function SettingsModal({ onClose }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
           <div className="avatar avatar-lg" style={{ fontSize: 24 }}>{(form.first_name || 'A')[0].toUpperCase()}</div>
           <div>
-            <h2 className="modal-title" style={{ marginBottom: 4 }}>Ajustes de cuenta</h2>
+            <h2 className="modal-title" style={{ marginBottom: 4 }}>{t('admin.settings.title')}</h2>
             <span className="badge badge-approved"><IconShield size={10} /> Admin</span>
           </div>
         </div>
         <form onSubmit={handleSave} className="stack">
           <div className="form-group">
-            <label className="form-label">Nombre</label>
+            <label className="form-label">{t('admin.settings.name')}</label>
             <input className="form-input" value={form.first_name} onChange={e => set('first_name', e.target.value)} />
           </div>
           <div className="form-group">
-            <label className="form-label">Email</label>
+            <label className="form-label">{t('admin.settings.email')}</label>
             <input className="form-input" type="email" value={form.email} onChange={e => set('email', e.target.value)} />
           </div>
           <div className="form-group">
-            <label className="form-label">Instagram</label>
+            <label className="form-label">{t('admin.settings.instagram')}</label>
             <input className="form-input" value={form.insta_handle} onChange={e => set('insta_handle', e.target.value)} placeholder="@tuusuario" />
           </div>
           <div className="form-group">
-            <label className="form-label">Nueva contraseña</label>
-            <input className="form-input" type="password" value={form.password} onChange={e => set('password', e.target.value)} placeholder="Dejar vacío para no cambiar" />
+            <label className="form-label">{t('admin.settings.newPassword')}</label>
+            <input className="form-input" type="password" value={form.password} onChange={e => set('password', e.target.value)} placeholder={t('admin.settings.newPasswordPlaceholder')} />
           </div>
           <button type="submit" className="btn btn-primary btn-full" disabled={saving}>
-            {saving ? <span className="spinner" /> : 'Guardar cambios'}
+            {saving ? <span className="spinner" /> : t('admin.settings.save')}
           </button>
           <button type="button" className="btn btn-danger btn-full" onClick={() => { useStore.getState().logout(); navigate('/auth') }}>
-            <IconLogout size={16} /> Cerrar sesión
+            <IconLogout size={16} /> {t('admin.settings.logout')}
           </button>
         </form>
       </div>
@@ -242,6 +246,7 @@ function SettingsModal({ onClose }) {
 // ─── Edit User Modal ──────────────────────────────────────────────────────────
 function EditUserModal({ user, onClose, onSaved }) {
   const toast = useToast()
+  const t = useT()
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({
     subscription_type: user.is_subscribed ? 'subscribed' : user.is_free_user ? 'free' : 'none',
@@ -262,11 +267,11 @@ function EditUserModal({ user, onClose, onSaved }) {
 
     try {
       await api.updateUser(user.id, data)
-      toast('Usuario actualizado ✓', 'success')
+      toast(t('admin.editUser.updated'), 'success')
       await useStore.getState().fetchAdminUsers()
       onSaved()
     } catch (err) {
-      toast(err.data?.error || 'Error al actualizar', 'error')
+      toast(err.data?.error || t('error.update'), 'error')
     }
     setSaving(false)
   }
@@ -274,9 +279,9 @@ function EditUserModal({ user, onClose, onSaved }) {
   const name = `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username
 
   const SUB_OPTIONS = [
-    { value: 'none', label: '🚫 Sin acceso', desc: 'No puede unirse a rutas' },
-    { value: 'free', label: '🆓 Usuario gratuito', desc: 'Acceso completo sin pago (zona Barcelona)' },
-    { value: 'subscribed', label: '⭐ Suscriptor', desc: 'Acceso completo de pago o promo' },
+    { value: 'none', label: t('admin.editUser.none'), desc: t('admin.editUser.noneDesc') },
+    { value: 'free', label: t('admin.editUser.free'), desc: t('admin.editUser.freeDesc') },
+    { value: 'subscribed', label: t('admin.editUser.subscribed'), desc: t('admin.editUser.subscribedDesc') },
   ]
 
   return (
@@ -300,7 +305,7 @@ function EditUserModal({ user, onClose, onSaved }) {
         </div>
 
         <form onSubmit={handleSave} className="stack">
-          <p className="section-title" style={{ marginBottom: 4 }}>Tipo de suscripción</p>
+          <p className="section-title" style={{ marginBottom: 4 }}>{t('admin.editUser.title')}</p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {SUB_OPTIONS.map((opt) => (
@@ -332,7 +337,7 @@ function EditUserModal({ user, onClose, onSaved }) {
           {/* Promo expiry — only shown for subscribed */}
           {form.subscription_type === 'subscribed' && (
             <div className="form-group">
-              <label className="form-label">Acceso hasta <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>(opcional — vacío = sin límite)</span></label>
+              <label className="form-label">{t('admin.editUser.accessUntil')} <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>({t('admin.editUser.accessUntilHint')})</span></label>
               <input
                 className="form-input"
                 type="date"
@@ -343,9 +348,9 @@ function EditUserModal({ user, onClose, onSaved }) {
           )}
 
           <div style={{ display: 'flex', gap: 8, paddingTop: 4 }}>
-            <button type="button" className="btn btn-ghost" onClick={onClose} style={{ flex: 1 }}>Cancelar</button>
+            <button type="button" className="btn btn-ghost" onClick={onClose} style={{ flex: 1 }}>{t('common.cancel')}</button>
             <button type="submit" className="btn btn-primary" style={{ flex: 2 }} disabled={saving}>
-              {saving ? <span className="spinner" /> : 'Guardar cambios'}
+              {saving ? <span className="spinner" /> : t('common.save')}
             </button>
           </div>
         </form>
@@ -357,6 +362,7 @@ function EditUserModal({ user, onClose, onSaved }) {
 // ─── Promo Codes Tab ──────────────────────────────────────────────────────────
 function PromoCodesTab() {
   const toast = useToast()
+  const t = useT()
   const [codes, setCodes] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -375,59 +381,71 @@ function PromoCodesTab() {
     const result = await api.deletePromoCode(id).then(() => ({ ok: true })).catch((e) => ({ error: e.data?.error || 'Error' }))
     setConfirmDelete(null)
     if (result.error) toast(result.error, 'error')
-    else { toast('Código eliminado', 'success'); load() }
+    else { toast(t('admin.promos.deleted'), 'success'); load() }
   }
 
   return (
     <div>
       <button className="btn btn-primary btn-full" style={{ marginBottom: 16 }} onClick={() => { setEditCode(null); setShowForm(true) }}>
-        <IconPlus size={16} /> Crear código promocional
+        <IconPlus size={16} /> {t('admin.promos.create')}
       </button>
 
       {loading && <div className="empty-state"><span className="spinner" /></div>}
 
       {!loading && codes.length === 0 && (
         <div className="empty-state">
-          <p className="empty-state-title">Sin códigos</p>
-          <p style={{ fontSize: 13, color: 'var(--text-3)' }}>Crea tu primer código promocional</p>
+          <p className="empty-state-title">{t('admin.promos.empty')}</p>
+          <p style={{ fontSize: 13, color: 'var(--text-3)' }}>{t('admin.promos.emptyHint')}</p>
         </div>
       )}
 
       <div className="stack">
-        {codes.map((code) => (
-          <div key={code.id} style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
-            <div style={{ padding: '14px 16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 20, fontWeight: 900, letterSpacing: '0.08em', color: 'var(--accent)' }}>
-                  {code.code}
-                </span>
-                <span className={`badge ${code.is_active ? 'badge-approved' : 'badge-ended'}`}>
-                  {code.is_active ? 'Activo' : 'Inactivo'}
-                </span>
-              </div>
-              <p style={{ fontSize: 13, color: 'var(--text-2)' }}>
-                {code.days_free} días gratis
-                {code.max_uses ? ` · Máx. ${code.max_uses} usos` : ' · Usos ilimitados'}
-                {code.uses_count !== undefined ? ` · Usado ${code.uses_count} veces` : ''}
-              </p>
-              {code.expires_at && (
-                <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>
-                  Expira: {format(new Date(code.expires_at), "d MMM yyyy", { locale: es })}
+        {codes.map((code) => {
+          const typeBadge = code.promo_type === 'free_account'
+            ? { bg: 'var(--green-dim)', color: 'var(--green)', text: '🆓 Free' }
+            : code.promo_type === 'discount'
+            ? { bg: 'var(--yellow-dim)', color: 'var(--yellow)', text: `💰 ${t('admin.promos.discountBadge', { pct: code.discount_percentage || 0 })}` }
+            : { bg: 'var(--accent-dim)', color: 'var(--accent)', text: `📅 ${code.days_free} days` }
+
+          return (
+            <div key={code.id} style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
+              <div style={{ padding: '14px 16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 20, fontWeight: 900, letterSpacing: '0.08em', color: 'var(--accent)' }}>
+                      {code.code}
+                    </span>
+                    <span style={{ fontSize: 11, background: typeBadge.bg, color: typeBadge.color, borderRadius: 4, padding: '2px 7px', fontWeight: 700 }}>
+                      {typeBadge.text}
+                    </span>
+                  </div>
+                  <span className={`badge ${code.is_active ? 'badge-approved' : 'badge-ended'}`}>
+                    {code.is_active ? t('admin.promos.active') : t('admin.promos.inactive')}
+                  </span>
+                </div>
+                <p style={{ fontSize: 13, color: 'var(--text-2)' }}>
+                  {code.uses_count !== undefined ? `${code.uses_count}` : '0'}/{code.max_uses || '∞'}
+                  {code.max_uses ? ` · ${t('admin.promos.maxUses', { max: code.max_uses })}` : ` · ${t('admin.promos.unlimited')}`}
                 </p>
-              )}
+                {code.expires_at && (
+                  <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>
+                    {t('admin.promos.expires', { date: format(new Date(code.expires_at), "d MMM yyyy", { locale: es }) })}
+                  </p>
+                )}
+              </div>
+              <div style={{ display: 'flex', borderTop: '1px solid var(--border)' }}>
+                <button className="btn btn-ghost btn-sm" style={{ flex: 1, borderRadius: 0, borderRight: '1px solid var(--border)' }}
+                  onClick={() => { setEditCode(code); setShowForm(true) }}>
+                  <IconEdit size={14} /> {t('admin.promos.edit')}
+                </button>
+                <button className="btn btn-ghost btn-sm" style={{ flex: 1, borderRadius: 0, color: 'var(--red)' }}
+                  onClick={() => setConfirmDelete(code)}>
+                  <IconTrash size={14} /> {t('admin.promos.delete')}
+                </button>
+              </div>
             </div>
-            <div style={{ display: 'flex', borderTop: '1px solid var(--border)' }}>
-              <button className="btn btn-ghost btn-sm" style={{ flex: 1, borderRadius: 0, borderRight: '1px solid var(--border)' }}
-                onClick={() => { setEditCode(code); setShowForm(true) }}>
-                <IconEdit size={14} /> Editar
-              </button>
-              <button className="btn btn-ghost btn-sm" style={{ flex: 1, borderRadius: 0, color: 'var(--red)' }}
-                onClick={() => setConfirmDelete(code)}>
-                <IconTrash size={14} /> Eliminar
-              </button>
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       {showForm && (
@@ -442,14 +460,14 @@ function PromoCodesTab() {
         <div className="modal-overlay" onClick={() => setConfirmDelete(null)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-handle" />
-            <h2 className="modal-title" style={{ fontSize: 20 }}>¿Eliminar código?</h2>
+            <h2 className="modal-title" style={{ fontSize: 20 }}>{t('admin.promos.deleteTitle')}</h2>
             <p style={{ fontSize: 15, color: 'var(--text-2)', marginBottom: 24 }}>
-              Se eliminará el código <strong>{confirmDelete.code}</strong> permanentemente.
+              {t('admin.promos.deleteDesc', { code: confirmDelete.code })}
             </p>
             <div style={{ display: 'flex', gap: 10 }}>
-              <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setConfirmDelete(null)}>Cancelar</button>
+              <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setConfirmDelete(null)}>{t('common.cancel')}</button>
               <button className="btn btn-danger" style={{ flex: 1 }} onClick={() => handleDelete(confirmDelete.id)}>
-                <IconTrash size={16} /> Eliminar
+                <IconTrash size={16} /> {t('common.delete')}
               </button>
             </div>
           </div>
@@ -462,10 +480,14 @@ function PromoCodesTab() {
 // ─── Promo Form Modal ─────────────────────────────────────────────────────────
 function PromoFormModal({ code, onClose, onSaved }) {
   const toast = useToast()
+  const t = useT()
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({
     code: code?.code || '',
+    promo_type: code?.promo_type || 'free_days',
     days_free: code?.days_free || 30,
+    discount_percentage: code?.discount_percentage || 0,
+    payment_url: code?.payment_url || '',
     max_uses: code?.max_uses || '',
     expires_at: code?.expires_at ? code.expires_at.slice(0, 10) : '',
     is_active: code?.is_active ?? true,
@@ -475,8 +497,15 @@ function PromoFormModal({ code, onClose, onSaved }) {
 
   const validate = () => {
     const e = {}
-    if (!form.code.trim()) e.code = 'Requerido'
-    if (!form.days_free || Number(form.days_free) < 1) e.days_free = 'Mínimo 1 día'
+    if (!form.code.trim()) e.code = t('validation.required')
+    if (form.promo_type === 'free_days') {
+      if (!form.days_free || Number(form.days_free) < 1) e.days_free = t('validation.minOneDay')
+    }
+    if (form.promo_type === 'discount') {
+      const pct = Number(form.discount_percentage)
+      if (!pct || pct < 1 || pct > 99) e.discount_percentage = '1-99'
+      if (!form.payment_url.trim()) e.payment_url = t('validation.required')
+    }
     setErrors(e)
     return !Object.keys(e).length
   }
@@ -487,7 +516,10 @@ function PromoFormModal({ code, onClose, onSaved }) {
     setSaving(true)
     const data = {
       code: form.code.trim().toUpperCase(),
-      days_free: Number(form.days_free),
+      promo_type: form.promo_type,
+      days_free: form.promo_type === 'free_days' ? Number(form.days_free) : 0,
+      discount_percentage: form.promo_type === 'discount' ? Number(form.discount_percentage) : 0,
+      payment_url: form.promo_type === 'discount' ? form.payment_url.trim() : '',
       max_uses: form.max_uses ? Number(form.max_uses) : null,
       expires_at: form.expires_at || null,
       is_active: form.is_active,
@@ -495,7 +527,7 @@ function PromoFormModal({ code, onClose, onSaved }) {
     try {
       if (code) await api.updatePromoCode(code.id, data)
       else await api.createPromoCode(data)
-      toast(code ? 'Código actualizado ✓' : 'Código creado ✓', 'success')
+      toast(code ? t('admin.promos.form.updated') : t('admin.promos.form.created'), 'success')
       onSaved()
     } catch (err) {
       toast(err.data?.error || 'Error al guardar', 'error')
@@ -503,39 +535,85 @@ function PromoFormModal({ code, onClose, onSaved }) {
     setSaving(false)
   }
 
+  const PROMO_TYPES = [
+    { value: 'free_account', label: t('admin.promos.typeFreeAccount') },
+    { value: 'discount', label: t('admin.promos.typeDiscount') },
+    { value: 'free_days', label: t('admin.promos.typeFreeDays') },
+  ]
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-handle" />
-        <h2 className="modal-title">{code ? 'Editar código' : 'Nuevo código'}</h2>
+        <h2 className="modal-title">{code ? t('admin.promos.form.titleEdit') : t('admin.promos.form.title')}</h2>
         <form onSubmit={handleSubmit} className="stack">
           <div className="form-group">
-            <label className="form-label">Código *</label>
+            <label className="form-label">{t('admin.promos.form.code')}</label>
             <input className="form-input" value={form.code} onChange={(e) => set('code', e.target.value.toUpperCase())}
-              placeholder="Ej: RUTILLAS30" style={{ textTransform: 'uppercase', letterSpacing: '0.08em' }} />
+              placeholder={t('admin.promos.form.codePlaceholder')} style={{ textTransform: 'uppercase', letterSpacing: '0.08em' }} />
             {errors.code && <span className="form-error">{errors.code}</span>}
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <div className="form-group">
-              <label className="form-label">Días gratis *</label>
-              <input className="form-input" type="number" min="1" max="365" value={form.days_free}
-                onChange={(e) => set('days_free', e.target.value)} />
-              {errors.days_free && <span className="form-error">{errors.days_free}</span>}
-            </div>
-            <div className="form-group">
-              <label className="form-label">Máx. usos</label>
-              <input className="form-input" type="number" min="1" value={form.max_uses}
-                onChange={(e) => set('max_uses', e.target.value)} placeholder="Ilimitado" />
-            </div>
-          </div>
           <div className="form-group">
-            <label className="form-label">Fecha de expiración</label>
+            <label className="form-label">{t('admin.promos.form.type')}</label>
+            <select className="form-input" value={form.promo_type} onChange={(e) => set('promo_type', e.target.value)}>
+              {PROMO_TYPES.map((opt) => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+          {form.promo_type === 'free_days' && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <div className="form-group">
+                <label className="form-label">{t('admin.promos.form.daysFree')}</label>
+                <input className="form-input" type="number" min="1" max="365" value={form.days_free}
+                  onChange={(e) => set('days_free', e.target.value)} />
+                {errors.days_free && <span className="form-error">{errors.days_free}</span>}
+              </div>
+              <div className="form-group">
+                <label className="form-label">{t('admin.promos.form.maxUses')}</label>
+                <input className="form-input" type="number" min="1" value={form.max_uses}
+                  onChange={(e) => set('max_uses', e.target.value)} placeholder={t('admin.promos.form.maxUsesPlaceholder')} />
+              </div>
+            </div>
+          )}
+          {form.promo_type === 'discount' && (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                <div className="form-group">
+                  <label className="form-label">{t('admin.promos.form.discountPercentage')}</label>
+                  <input className="form-input" type="number" min="1" max="99" value={form.discount_percentage}
+                    onChange={(e) => set('discount_percentage', e.target.value)} />
+                  {errors.discount_percentage && <span className="form-error">{errors.discount_percentage}</span>}
+                </div>
+                <div className="form-group">
+                  <label className="form-label">{t('admin.promos.form.maxUses')}</label>
+                  <input className="form-input" type="number" min="1" value={form.max_uses}
+                    onChange={(e) => set('max_uses', e.target.value)} placeholder={t('admin.promos.form.maxUsesPlaceholder')} />
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">{t('admin.promos.form.paymentUrl')}</label>
+                <input className="form-input" type="url" value={form.payment_url}
+                  onChange={(e) => set('payment_url', e.target.value)} placeholder={t('admin.promos.form.paymentUrlPlaceholder')} />
+                {errors.payment_url && <span className="form-error">{errors.payment_url}</span>}
+              </div>
+            </>
+          )}
+          {form.promo_type === 'free_account' && (
+            <div className="form-group">
+              <label className="form-label">{t('admin.promos.form.maxUses')}</label>
+              <input className="form-input" type="number" min="1" value={form.max_uses}
+                onChange={(e) => set('max_uses', e.target.value)} placeholder={t('admin.promos.form.maxUsesPlaceholder')} />
+            </div>
+          )}
+          <div className="form-group">
+            <label className="form-label">{t('admin.promos.form.expiresAt')}</label>
             <input className="form-input" type="date" value={form.expires_at}
               onChange={(e) => set('expires_at', e.target.value)} />
           </div>
           <div style={{ background: 'var(--bg-3)', borderRadius: 'var(--radius)', padding: '4px 14px' }}>
             <div className="toggle-row">
-              <span className="toggle-label">Código activo</span>
+              <span className="toggle-label">{t('admin.promos.form.isActive')}</span>
               <label className="toggle">
                 <input type="checkbox" checked={form.is_active} onChange={(e) => set('is_active', e.target.checked)} />
                 <span className="toggle-slider" />
@@ -543,9 +621,9 @@ function PromoFormModal({ code, onClose, onSaved }) {
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, paddingTop: 4 }}>
-            <button type="button" className="btn btn-ghost" onClick={onClose} style={{ flex: 1 }}>Cancelar</button>
+            <button type="button" className="btn btn-ghost" onClick={onClose} style={{ flex: 1 }}>{t('admin.promos.form.cancel')}</button>
             <button type="submit" className="btn btn-primary" style={{ flex: 2 }} disabled={saving}>
-              {saving ? <span className="spinner" /> : code ? 'Guardar' : 'Crear código'}
+              {saving ? <span className="spinner" /> : code ? t('admin.promos.form.save') : t('admin.promos.form.create')}
             </button>
           </div>
         </form>
@@ -553,6 +631,7 @@ function PromoFormModal({ code, onClose, onSaved }) {
     </div>
   )
 }
+
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 export default function AdminPage() {
@@ -562,6 +641,7 @@ export default function AdminPage() {
   const adminUsers = useStore((s) => s.adminUsers)
   const participants = useStore((s) => s.participants)
   const toast = useToast()
+  const t = useT()
   const [freeStats, setFreeStats] = useState(null)
 
   const [showForm, setShowForm] = useState(false)
@@ -580,7 +660,7 @@ export default function AdminPage() {
   }, [])
 
   if (!currentUser?.is_staff) {
-    return <div style={{ padding: 24, textAlign: 'center' }}><p style={{ color: 'var(--text-3)' }}>Acceso restringido</p></div>
+    return <div style={{ padding: 24, textAlign: 'center' }}><p style={{ color: 'var(--text-3)' }}>{t('error.restricted')}</p></div>
   }
 
   const totalPending = Object.values(participants).flat().filter(p => p.status === 'pending').length
@@ -589,17 +669,17 @@ export default function AdminPage() {
     const result = await useStore.getState().deleteRoute(confirmDelete.id)
     setConfirmDelete(null)
     if (result?.error) toast(result.error, 'error')
-    else toast('Ruta eliminada', 'success')
+    else toast(t('admin.routeDeleted'), 'success')
   }
 
   const handleDeleteUser = async () => {
     try {
       await api.deleteUser(confirmDeleteUser.id)
-      toast('Usuario eliminado', 'success')
+      toast(t('admin.userDeleted'), 'success')
       useStore.getState().fetchAdminUsers()
       setConfirmDeleteUser(null)
     } catch (err) {
-      toast(err.data?.error || 'Error al eliminar', 'error')
+      toast(err.data?.error || t('error.delete'), 'error')
       setConfirmDeleteUser(null)
     }
   }
@@ -614,19 +694,19 @@ export default function AdminPage() {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <IconShield size={22} style={{ color: 'var(--accent)' }} />
-            <h1 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 26, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Admin</h1>
+            <h1 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 26, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('admin.title')}</h1>
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
             <button className="btn btn-ghost btn-sm btn-icon" onClick={() => setShowSettings(true)}><IconSettings size={18} /></button>
-            <button className="btn btn-primary btn-sm" onClick={() => { setEditRoute(null); setShowForm(true) }}><IconPlus size={16} /> Nueva ruta</button>
+            <button className="btn btn-primary btn-sm" onClick={() => { setEditRoute(null); setShowForm(true) }}><IconPlus size={16} /> {t('admin.newRoute')}</button>
           </div>
         </div>
         <div style={{ display: 'flex', gap: 10, marginTop: 14 }}>
           {[
-            { label: 'Rutas', value: routes.length },
-            { label: 'Riders', value: adminUsers.length },
-            { label: 'Pendientes', value: totalPending, accent: totalPending > 0 },
-            { label: 'Free slots', value: freeStats ? `${freeStats.free_spots_left}/50` : '…', accent: false },
+            { label: t('admin.stats.routes'), value: routes.length },
+            { label: t('admin.stats.riders'), value: adminUsers.length },
+            { label: t('admin.stats.pending'), value: totalPending, accent: totalPending > 0 },
+            { label: t('admin.stats.freeSlots'), value: freeStats ? `${freeStats.free_spots_left}/50` : '…', accent: false },
           ].map(s => (
             <div key={s.label} style={{ flex: 1, background: 'var(--bg-3)', border: `1px solid ${s.accent ? 'var(--accent-border)' : 'var(--border)'}`, borderRadius: 'var(--radius)', padding: 10, textAlign: 'center' }}>
               <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 22, fontWeight: 900, color: s.accent ? 'var(--accent)' : 'var(--text)' }}>{s.value}</p>
@@ -638,9 +718,9 @@ export default function AdminPage() {
 
       {/* Tabs */}
       <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', padding: '0 16px' }}>
-        {[{ key: 'routes', label: 'Rutas' }, { key: 'users', label: `Riders (${adminUsers.length})` }, { key: 'promos', label: '🎟️ Promos' }].map(t => (
-          <button key={t.key} onClick={() => setTab(t.key)} style={{ padding: '12px 16px', border: 'none', background: 'transparent', color: tab === t.key ? 'var(--accent)' : 'var(--text-3)', fontFamily: "'Barlow Condensed', sans-serif", fontSize: 14, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', cursor: 'pointer', borderBottom: tab === t.key ? '2px solid var(--accent)' : '2px solid transparent', marginBottom: -1 }}>
-            {t.label}
+        {[{ key: 'routes', label: t('admin.tabs.routes') }, { key: 'users', label: `${t('admin.tabs.users')} (${adminUsers.length})` }, { key: 'promos', label: t('admin.tabs.promos') }].map(tabItem => (
+          <button key={tabItem.key} onClick={() => setTab(tabItem.key)} style={{ padding: '12px 16px', border: 'none', background: 'transparent', color: tab === tabItem.key ? 'var(--accent)' : 'var(--text-3)', fontFamily: "'Barlow Condensed', sans-serif", fontSize: 14, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', cursor: 'pointer', borderBottom: tab === tabItem.key ? '2px solid var(--accent)' : '2px solid transparent', marginBottom: -1 }}>
+            {tabItem.label}
           </button>
         ))}
       </div>
@@ -649,7 +729,7 @@ export default function AdminPage() {
         {/* Routes tab */}
         {tab === 'routes' && (
           <div className="stack">
-            {routes.length === 0 && <div className="empty-state"><IconCalendar size={40} /><p className="empty-state-title">Sin rutas</p></div>}
+            {routes.length === 0 && <div className="empty-state"><IconCalendar size={40} /><p className="empty-state-title">{t('admin.noRoutes')}</p></div>}
             {routes.map(route => {
               const routeParts = participants[route.id] || []
               const pending = routeParts.filter(p => p.status === 'pending').length
@@ -658,16 +738,16 @@ export default function AdminPage() {
                 <div key={route.id} style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
                   <div style={{ padding: '14px 16px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-                      <span className={`badge badge-${route.status}`}>{route.status === 'active' ? 'En curso' : route.status === 'upcoming' ? 'Próximo' : route.status === 'full' ? 'Completo' : 'Finalizado'}</span>
-                      {pending > 0 && <span className="badge badge-pending">{pending} pendientes</span>}
+                      <span className={`badge badge-${route.status}`}>{route.status === 'active' ? t('routes.status.active') : route.status === 'upcoming' ? t('routes.status.upcoming') : route.status === 'full' ? t('routes.status.full') : t('routes.status.ended')}</span>
+                      {pending > 0 && <span className="badge badge-pending">{t('admin.pending', { count: pending })}</span>}
                     </div>
                     <h3 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 18, fontWeight: 900, textTransform: 'uppercase' }}>{route.title}</h3>
                     <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 3 }}>{format(new Date(route.date), "d MMM yyyy · HH:mm", { locale: es })} · {route.city}</p>
-                    <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>{route.approved_count} / {route.max_participants} riders aceptados</p>
+                    <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>{t('admin.ridersAccepted', { count: route.approved_count, max: route.max_participants })}</p>
                   </div>
                   <div style={{ display: 'flex', borderTop: '1px solid var(--border)' }}>
-                    <button className="btn btn-ghost btn-sm" style={{ flex: 1, borderRadius: 0, borderRight: '1px solid var(--border)' }} onClick={() => setShowParticipants(route)}><IconUsers size={14} /> Riders</button>
-                    <button className="btn btn-ghost btn-sm" style={{ flex: 1, borderRadius: 0, borderRight: '1px solid var(--border)' }} onClick={() => navigate(`/events/${route.id}`)}>Ver</button>
+                    <button className="btn btn-ghost btn-sm" style={{ flex: 1, borderRadius: 0, borderRight: '1px solid var(--border)' }} onClick={() => setShowParticipants(route)}><IconUsers size={14} /> {t('admin.riders')}</button>
+                    <button className="btn btn-ghost btn-sm" style={{ flex: 1, borderRadius: 0, borderRight: '1px solid var(--border)' }} onClick={() => navigate(`/events/${route.id}`)}>{t('admin.view')}</button>
                     <button className="btn btn-ghost btn-sm" style={{ flex: 1, borderRadius: 0, borderRight: '1px solid var(--border)' }} onClick={() => { setEditRoute(route); setShowForm(true) }}><IconEdit size={14} /></button>
                     <button className="btn btn-ghost btn-sm" style={{ flex: 1, borderRadius: 0, color: 'var(--red)' }} onClick={() => setConfirmDelete(route)}><IconTrash size={14} /></button>
                   </div>
@@ -680,7 +760,7 @@ export default function AdminPage() {
         {/* Users tab */}
         {tab === 'users' && (
           <div className="stack">
-            {adminUsers.length === 0 && <div className="empty-state"><IconUsers size={40} /><p className="empty-state-title">Sin riders</p></div>}
+            {adminUsers.length === 0 && <div className="empty-state"><IconUsers size={40} /><p className="empty-state-title">{t('admin.noRiders')}</p></div>}
             {adminUsers.map(user => (
               <div key={user.id} style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
                 <div style={{ padding: '14px 16px' }}>
@@ -709,11 +789,11 @@ export default function AdminPage() {
                 <div style={{ display: 'flex', borderTop: '1px solid var(--border)' }}>
                   <button className="btn btn-ghost btn-sm" style={{ flex: 1, borderRadius: 0, borderRight: '1px solid var(--border)' }}
                     onClick={() => setEditUser(user)}>
-                    <IconEdit size={14} /> Suscripción
+                    <IconEdit size={14} /> {t('admin.subscription')}
                   </button>
                   <button className="btn btn-ghost btn-sm" style={{ flex: 1, borderRadius: 0, color: 'var(--red)' }}
                     onClick={() => setConfirmDeleteUser(user)}>
-                    <IconTrash size={14} /> Eliminar
+                    <IconTrash size={14} /> {t('common.delete')}
                   </button>
                 </div>
               </div>
@@ -741,11 +821,11 @@ export default function AdminPage() {
         <div className="modal-overlay" onClick={() => setConfirmDelete(null)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-handle" />
-            <h2 className="modal-title" style={{ fontSize: 20 }}>¿Eliminar ruta?</h2>
-            <p style={{ fontSize: 15, color: 'var(--text-2)', marginBottom: 24 }}>Se eliminará <strong>"{confirmDelete.title}"</strong> permanentemente.</p>
+            <h2 className="modal-title" style={{ fontSize: 20 }}>{t('admin.deleteRoute')}</h2>
+            <p style={{ fontSize: 15, color: 'var(--text-2)', marginBottom: 24 }}>{t('admin.deleteRouteDesc', { title: confirmDelete.title })}</p>
             <div style={{ display: 'flex', gap: 10 }}>
-              <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setConfirmDelete(null)}>Cancelar</button>
-              <button className="btn btn-danger" style={{ flex: 1 }} onClick={handleDelete}><IconTrash size={16} /> Eliminar</button>
+              <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setConfirmDelete(null)}>{t('common.cancel')}</button>
+              <button className="btn btn-danger" style={{ flex: 1 }} onClick={handleDelete}><IconTrash size={16} /> {t('common.delete')}</button>
             </div>
           </div>
         </div>
@@ -754,16 +834,16 @@ export default function AdminPage() {
         <div className="modal-overlay" onClick={() => setConfirmDeleteUser(null)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-handle" />
-            <h2 className="modal-title" style={{ fontSize: 20 }}>¿Eliminar cuenta?</h2>
+            <h2 className="modal-title" style={{ fontSize: 20 }}>{t('admin.deleteUser')}</h2>
             <p style={{ fontSize: 15, color: 'var(--text-2)', marginBottom: 8 }}>
-              Se eliminará la cuenta de <strong>{confirmDeleteUser.first_name} {confirmDeleteUser.last_name}</strong> permanentemente.
+              {t('admin.deleteUserDesc', { name: `${confirmDeleteUser.first_name} ${confirmDeleteUser.last_name}` })}
             </p>
             <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 24 }}>
               {confirmDeleteUser.email} · {confirmDeleteUser.routes_count} ruta{confirmDeleteUser.routes_count !== 1 ? 's' : ''}
             </p>
             <div style={{ display: 'flex', gap: 10 }}>
-              <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setConfirmDeleteUser(null)}>Cancelar</button>
-              <button className="btn btn-danger" style={{ flex: 1 }} onClick={handleDeleteUser}><IconTrash size={16} /> Eliminar</button>
+              <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setConfirmDeleteUser(null)}>{t('common.cancel')}</button>
+              <button className="btn btn-danger" style={{ flex: 1 }} onClick={handleDeleteUser}><IconTrash size={16} /> {t('common.delete')}</button>
             </div>
           </div>
         </div>

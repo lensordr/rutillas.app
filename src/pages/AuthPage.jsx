@@ -5,36 +5,15 @@ import BlakerLogo from '../components/BlakerLogo'
 import { useToast } from '../components/Toast'
 import { api } from '../api'
 import { Turnstile, useHoneypot, checkRateLimit, resetRateLimit, formatRetryAfter, RATE_LIMITS, validatePassword } from '../security'
-
-const MOTO_TYPE_OPTIONS = [
-  { value: 'naked', label: 'Naked' },
-  { value: 'sport', label: 'Sport / Supersport' },
-  { value: 'adventure', label: 'Adventure / Trail' },
-  { value: 'touring', label: 'Touring' },
-  { value: 'scrambler', label: 'Scrambler / Café Racer' },
-  { value: 'custom', label: 'Custom / Cruiser' },
-  { value: 'enduro', label: 'Enduro / Off-road' },
-  { value: 'other', label: 'Otra' },
-]
-
-const EXPERIENCE_OPTIONS = [
-  { value: 'beginner', label: '🟢 Principiante — menos de 2 años' },
-  { value: 'medio', label: '🟡 Medio — 2 a 5 años' },
-  { value: 'advanced', label: '🔴 Avanzado — más de 5 años' },
-]
-
-const HEARD_FROM_OPTIONS = [
-  { value: 'instagram', label: 'Instagram' },
-  { value: 'tiktok', label: 'TikTok' },
-  { value: 'friends', label: 'Amigos' },
-  { value: 'other', label: 'Otro' },
-]
+import { useT } from '../i18n/useT'
+import { detectLanguage } from '../i18n/detectLanguage'
 
 // ─── Email Confirm Screen ─────────────────────────────────────────────────────
 function EmailConfirmScreen({ email, paymentUrl, onDone }) {
   const [sent, setSent] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const t = useT()
 
   const handleSend = async () => {
     setLoading(true)
@@ -44,9 +23,9 @@ function EmailConfirmScreen({ email, paymentUrl, onDone }) {
       setSent(true)
     } catch (e) {
       if (e.status === 429) {
-        setError('Demasiados intentos. Espera un momento.')
+        setError(t('auth.confirm.tooMany'))
       } else {
-        setError('Error al enviar. Inténtalo de nuevo.')
+        setError(t('auth.confirm.sendError'))
       }
     }
     setLoading(false)
@@ -56,22 +35,22 @@ function EmailConfirmScreen({ email, paymentUrl, onDone }) {
     <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 24px', background: 'var(--bg)', textAlign: 'center' }}>
       <div style={{ fontSize: 64, marginBottom: 16 }}>{sent ? '📬' : '✉️'}</div>
       <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 32, fontWeight: 900, textTransform: 'uppercase', marginBottom: 8 }}>
-        {sent ? 'Email enviado' : 'Confirma tu cuenta'}
+        {sent ? t('auth.confirm.titleSent') : t('auth.confirm.title')}
       </h2>
       <p style={{ fontSize: 15, color: 'var(--text-2)', marginBottom: 8, lineHeight: 1.6, maxWidth: 380 }}>
         {sent
-          ? <>Hemos enviado el enlace de confirmación a <strong style={{ color: 'var(--text)' }}>{email}</strong></>
-          : <>Tu cuenta está lista. Pulsa el botón para recibir el enlace de confirmación en <strong style={{ color: 'var(--text)' }}>{email}</strong></>
+          ? <>{t('auth.confirm.descriptionSent')} <strong style={{ color: 'var(--text)' }}>{email}</strong></>
+          : <>{t('auth.confirm.description')} <strong style={{ color: 'var(--text)' }}>{email}</strong></>
         }
       </p>
       {sent && (
         <p style={{ fontSize: 15, color: 'var(--text-2)', marginBottom: 24, lineHeight: 1.6, maxWidth: 380 }}>
-          Haz clic en el enlace para <strong>activar tu cuenta</strong> antes de iniciar sesión.
+          {t('auth.confirm.activateHint')}
         </p>
       )}
       {!sent && (
         <p style={{ fontSize: 14, color: 'var(--text-3)', marginBottom: 24, lineHeight: 1.6, maxWidth: 380 }}>
-          No te enviaremos nada sin que lo pidas.
+          {t('auth.confirm.noSpam')}
         </p>
       )}
 
@@ -88,12 +67,12 @@ function EmailConfirmScreen({ email, paymentUrl, onDone }) {
           onClick={handleSend}
           disabled={loading}
         >
-          {loading ? <span className="spinner" /> : '📧 Enviar email de confirmación'}
+          {loading ? <span className="spinner" /> : t('auth.confirm.sendBtn')}
         </button>
       ) : (
         <div style={{ background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', borderRadius: 'var(--radius-lg)', padding: '16px 20px', marginBottom: 24, maxWidth: 380, width: '100%' }}>
           <p style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.5 }}>
-            ⚠️ <strong style={{ color: 'var(--accent)' }}>Importante:</strong> Si no ves el email, revisa tu carpeta de <strong>spam o correo no deseado</strong>.
+            {t('auth.confirm.spamWarning')}
           </p>
         </div>
       )}
@@ -101,10 +80,10 @@ function EmailConfirmScreen({ email, paymentUrl, onDone }) {
       {paymentUrl && (
         <div style={{ background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', borderRadius: 'var(--radius-lg)', padding: '20px', marginBottom: 16, maxWidth: 380, width: '100%' }}>
           <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 18, fontWeight: 900, textTransform: 'uppercase', marginBottom: 6 }}>
-            🎉 ¡Tienes un descuento!
+            🎉 {t('auth.confirm.discount')}
           </p>
           <p style={{ fontSize: 14, color: 'var(--text-2)', marginBottom: 14, lineHeight: 1.5 }}>
-            Tu código incluye un descuento especial. Activa tu suscripción con precio reducido:
+            {t('auth.confirm.discountDesc')}
           </p>
           <a
             href={paymentUrl}
@@ -113,7 +92,7 @@ function EmailConfirmScreen({ email, paymentUrl, onDone }) {
             className="btn btn-primary btn-full"
             style={{ textDecoration: 'none' }}
           >
-            🏍️ Suscribirse con descuento
+            {t('auth.confirm.subscribeDiscount')}
           </a>
         </div>
       )}
@@ -123,11 +102,11 @@ function EmailConfirmScreen({ email, paymentUrl, onDone }) {
         style={{ maxWidth: 320, marginBottom: 16 }}
         onClick={onDone}
       >
-        Ir a iniciar sesión
+        {t('auth.confirm.goLogin')}
       </button>
 
       <p style={{ fontSize: 13, color: 'var(--text-3)', maxWidth: 320 }}>
-        ¿Problemas? Escríbenos a{' '}
+        {t('auth.confirm.problems')}{' '}
         <a href="mailto:rutillasmoto@outlook.com" style={{ color: 'var(--accent)', textDecoration: 'none', fontWeight: 600 }}>
           rutillasmoto@outlook.com
         </a>
@@ -169,6 +148,7 @@ export default function AuthPage() {
   const register = useStore((s) => s.register)
   const toast = useToast()
   const { HoneypotFields, validateHoneypot, resetTimer } = useHoneypot()
+  const t = useT()
 
   useEffect(() => {
     // Capture PWA install prompt
@@ -193,6 +173,7 @@ export default function AuthPage() {
     latitude: null,
     longitude: null,
     locationDenied: false,
+    preferredLanguage: 'es',
   })
 
   const set = (field, value) => {
@@ -202,26 +183,26 @@ export default function AuthPage() {
 
   const validateStep1 = () => {
     const e = {}
-    if (!form.name.trim()) e.name = 'Nombre requerido'
-    if (!form.email.trim()) e.email = 'Email requerido'
-    if (!form.password || form.password.length < 6) e.password = 'Mínimo 6 caracteres'
+    if (!form.name.trim()) e.name = t('validation.nameRequired')
+    if (!form.email.trim()) e.email = t('validation.emailRequired')
+    if (!form.password || form.password.length < 6) e.password = t('validation.passwordMin')
     setErrors(e)
     return Object.keys(e).length === 0
   }
 
   const validateStep2 = () => {
     const e = {}
-    if (!form.motoType) e.motoType = 'Selecciona el tipo de moto'
-    if (!form.motoModel.trim()) e.motoModel = 'Indica tu moto'
-    if (!form.latitude) e.location = 'Activa tu ubicación para continuar'
-    if (!form.experience) e.experience = 'Selecciona tu nivel'
+    if (!form.motoType) e.motoType = t('validation.motoTypeRequired')
+    if (!form.motoModel.trim()) e.motoModel = t('validation.motoModelRequired')
+    if (!form.latitude) e.location = t('validation.locationRequired')
+    if (!form.experience) e.experience = t('validation.experienceRequired')
     setErrors(e)
     return Object.keys(e).length === 0
   }
 
   const validateStep3 = () => {
     const e = {}
-    if (!form.heardFrom) e.heardFrom = 'Selecciona una opción'
+    if (!form.heardFrom) e.heardFrom = t('validation.heardFromRequired')
     setErrors(e)
     return Object.keys(e).length === 0
   }
@@ -229,20 +210,20 @@ export default function AuthPage() {
   const handleLogin = async (e) => {
     e.preventDefault()
     const errs = {}
-    if (!form.email.trim()) errs.email = 'Email requerido'
-    if (!form.password) errs.password = 'Contraseña requerida'
+    if (!form.email.trim()) errs.email = t('validation.emailRequired')
+    if (!form.password) errs.password = t('validation.passwordRequired')
     if (Object.keys(errs).length) { setErrors(errs); return }
 
     // Rate limit check
     const rateCheck = checkRateLimit('login', RATE_LIMITS.login)
     if (!rateCheck.allowed) {
-      setErrors({ general: `Demasiados intentos. Espera ${formatRetryAfter(rateCheck.retryAfterMs)}.` })
+      setErrors({ general: t('auth.tooManyAttempts', { time: formatRetryAfter(rateCheck.retryAfterMs) }) })
       return
     }
 
     // CAPTCHA check
     if (!captchaToken) {
-      setErrors({ general: 'Completa la verificación de seguridad' })
+      setErrors({ general: t('auth.completeCaptcha') })
       return
     }
 
@@ -254,7 +235,7 @@ export default function AuthPage() {
       setCaptchaToken(null) // Reset CAPTCHA on failure
     } else {
       resetRateLimit('login')
-      toast('¡Bienvenido de vuelta!', 'success')
+      toast(t('auth.welcomeBack'), 'success')
       navigate('/')
     }
   }
@@ -279,13 +260,13 @@ export default function AuthPage() {
     // Rate limit check
     const rateCheck = checkRateLimit('register', RATE_LIMITS.register)
     if (!rateCheck.allowed) {
-      setErrors({ general: `Demasiados intentos. Espera ${formatRetryAfter(rateCheck.retryAfterMs)}.` })
+      setErrors({ general: t('auth.tooManyAttempts', { time: formatRetryAfter(rateCheck.retryAfterMs) }) })
       return
     }
 
     // CAPTCHA check
     if (!captchaToken) {
-      setErrors({ general: 'Completa la verificación de seguridad' })
+      setErrors({ general: t('auth.completeCaptcha') })
       return
     }
 
@@ -315,7 +296,7 @@ export default function AuthPage() {
     }
   }
 
-  const stepTitles = ['Tu cuenta', 'Tu moto', 'Preferencias']
+  const stepTitles = [t('auth.stepAccount'), t('auth.stepMoto'), t('auth.stepPrefs')]
 
   // Email confirmation screen shown after registration
   if (showEmailConfirm) {
@@ -337,10 +318,10 @@ export default function AuthPage() {
       <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 24px', background: 'var(--bg)', textAlign: 'center' }}>
         <div style={{ fontSize: 64, marginBottom: 16 }}>📲</div>
         <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 32, fontWeight: 900, textTransform: 'uppercase', marginBottom: 8 }}>
-          Instala RUTILLAS
+          {t('auth.install.title')}
         </h2>
         <p style={{ fontSize: 15, color: 'var(--text-2)', marginBottom: 28, lineHeight: 1.6, maxWidth: 340 }}>
-          Añade la app a tu pantalla de inicio para acceder rápido a tus rutas, chat y notificaciones.
+          {t('auth.install.description')}
         </p>
 
         {/* Android — native install button */}
@@ -355,7 +336,7 @@ export default function AuthPage() {
               goNext()
             }}
           >
-            📲 Instalar en mi móvil
+            {t('auth.install.btn')}
           </button>
         )}
 
@@ -363,13 +344,13 @@ export default function AuthPage() {
         {(isIOS || !deferredPrompt) && (
           <div style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '20px', maxWidth: 340, width: '100%', marginBottom: 16, textAlign: 'left' }}>
             <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 14, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 14 }}>
-              {isIOS ? '📱 iPhone / iPad' : '📱 Cómo instalar'}
+              {isIOS ? t('auth.install.iosTitle') : t('auth.install.howTo')}
             </p>
             {[
-              { n: '1', text: 'Abre esta página en Safari' },
-              { n: '2', text: 'Toca el botón Compartir  ⎙  (abajo en iPhone, arriba en iPad)' },
-              { n: '3', text: 'Desplázate y toca "Añadir a pantalla de inicio"' },
-              { n: '4', text: 'Toca "Añadir" para confirmar' },
+              { n: '1', text: t('auth.install.step1') },
+              { n: '2', text: t('auth.install.step2') },
+              { n: '3', text: t('auth.install.step3') },
+              { n: '4', text: t('auth.install.step4') },
             ].map((s) => (
               <div key={s.n} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 12 }}>
                 <div style={{ width: 26, height: 26, borderRadius: '50%', background: 'var(--accent)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 900, fontSize: 13, flexShrink: 0 }}>
@@ -386,7 +367,7 @@ export default function AuthPage() {
           style={{ maxWidth: 320 }}
           onClick={goNext}
         >
-          Continuar sin instalar →
+          {t('auth.install.skip')}
         </button>
       </div>
     )
@@ -438,7 +419,7 @@ export default function AuthPage() {
           padding: 3,
           marginBottom: 24,
         }}>
-          {[['login', 'Entrar'], ['register', 'Registrarse']].map(([m, label]) => (
+          {[['login', t('auth.login')], ['register', t('auth.register')]].map(([m, label]) => (
             <button
               key={m}
               onClick={() => { setMode(m); setStep(1); setErrors({}); setCaptchaToken(null); resetTimer() }}
@@ -473,23 +454,23 @@ export default function AuthPage() {
               </div>
             )}
             <div className="form-group">
-              <label className="form-label">Email</label>
-              <input className="form-input" type="email" placeholder="tu@email.com"
+              <label className="form-label">{t('auth.email')}</label>
+              <input className="form-input" type="email" placeholder={t('auth.emailPlaceholder')}
                 value={form.email} onChange={(e) => set('email', e.target.value)} autoComplete="email" />
               {errors.email && <span className="form-error">{errors.email}</span>}
             </div>
             <div className="form-group">
-              <label className="form-label">Contraseña</label>
-              <input className="form-input" type="password" placeholder="••••••"
+              <label className="form-label">{t('auth.password')}</label>
+              <input className="form-input" type="password" placeholder={t('auth.passwordPlaceholder')}
                 value={form.password} onChange={(e) => set('password', e.target.value)} autoComplete="current-password" />
               {errors.password && <span className="form-error">{errors.password}</span>}
             </div>
             <button type="submit" className="btn btn-primary btn-full btn-lg" disabled={loading}>
-              {loading ? <span className="spinner" /> : 'Entrar'}
+              {loading ? <span className="spinner" /> : t('auth.login')}
             </button>
             <Turnstile onVerify={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />
             <button type="button" className="btn btn-ghost btn-full btn-sm" onClick={() => navigate('/auth/forgot')} style={{ marginTop: -4 }}>
-              ¿Olvidaste tu contraseña?
+              {t('auth.forgotPassword')}
             </button>
 
           </form>
@@ -513,7 +494,7 @@ export default function AuthPage() {
                 {stepTitles[step - 1]}
               </p>
               <p style={{ fontSize: 12, color: 'var(--text-3)', textAlign: 'center', marginTop: 2 }}>
-                Paso {step} de 3
+                {t('auth.step', { step, total: 3 })}
               </p>
             </div>
 
@@ -528,25 +509,25 @@ export default function AuthPage() {
               <form onSubmit={handleNext} className="stack">
                 <HoneypotFields />
                 <div className="form-group">
-                  <label className="form-label">Nombre completo</label>
-                  <input className="form-input" type="text" placeholder="Tu nombre"
+                  <label className="form-label">{t('auth.name')}</label>
+                  <input className="form-input" type="text" placeholder={t('auth.namePlaceholder')}
                     value={form.name} onChange={(e) => set('name', e.target.value)} autoComplete="name" />
                   {errors.name && <span className="form-error">{errors.name}</span>}
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Email</label>
-                  <input className="form-input" type="email" placeholder="tu@email.com"
+                  <label className="form-label">{t('auth.email')}</label>
+                  <input className="form-input" type="email" placeholder={t('auth.emailPlaceholder')}
                     value={form.email} onChange={(e) => set('email', e.target.value)} autoComplete="email" />
                   {errors.email && <span className="form-error">{errors.email}</span>}
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Contraseña</label>
-                  <input className="form-input" type="password" placeholder="Mínimo 6 caracteres"
+                  <label className="form-label">{t('auth.password')}</label>
+                  <input className="form-input" type="password" placeholder={t('auth.passwordMinHint')}
                     value={form.password} onChange={(e) => set('password', e.target.value)} autoComplete="new-password" />
                   {errors.password && <span className="form-error">{errors.password}</span>}
                 </div>
                 <button type="submit" className="btn btn-primary btn-full btn-lg">
-                  Siguiente →
+                  {t('auth.next')}
                 </button>
               </form>
             )}
@@ -555,44 +536,53 @@ export default function AuthPage() {
             {step === 2 && (
               <form onSubmit={handleNext} className="stack">
                 <div className="form-group">
-                  <label className="form-label">Tipo de moto</label>
+                  <label className="form-label">{t('register.motoType')}</label>
                   <select className="form-select" value={form.motoType} onChange={(e) => set('motoType', e.target.value)}>
-                    <option value="">Selecciona el tipo...</option>
-                    {MOTO_TYPE_OPTIONS.map((o) => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
+                    <option value="">{t('register.motoTypePlaceholder')}</option>
+                    {[
+                      { value: 'naked', key: 'motoType.naked' },
+                      { value: 'sport', key: 'motoType.sport' },
+                      { value: 'adventure', key: 'motoType.adventure' },
+                      { value: 'touring', key: 'motoType.touring' },
+                      { value: 'scrambler', key: 'motoType.scrambler' },
+                      { value: 'custom', key: 'motoType.custom' },
+                      { value: 'enduro', key: 'motoType.enduro' },
+                      { value: 'other', key: 'motoType.other' },
+                    ].map((o) => (
+                      <option key={o.value} value={o.value}>{t(o.key)}</option>
                     ))}
                   </select>
                   {errors.motoType && <span className="form-error">{errors.motoType}</span>}
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Marca y modelo</label>
-                  <input className="form-input" type="text" placeholder="Ej: Yamaha MT-07, Honda CB500F..."
+                  <label className="form-label">{t('register.motoModel')}</label>
+                  <input className="form-input" type="text" placeholder={t('register.motoModelPlaceholder')}
                     value={form.motoModel} onChange={(e) => set('motoModel', e.target.value)} />
                   {errors.motoModel && <span className="form-error">{errors.motoModel}</span>}
                 </div>
                 {/* Mandatory GPS location */}
                 <div className="form-group">
-                  <label className="form-label">Tu ubicación <span style={{ color: 'var(--red)', fontWeight: 700 }}>*</span></label>
+                  <label className="form-label">{t('register.location')} <span style={{ color: 'var(--red)', fontWeight: 700 }}>*</span></label>
                   {form.latitude ? (
                     <div style={{ background: 'var(--green-dim)', border: '1px solid rgba(22,163,74,0.25)', borderRadius: 'var(--radius)', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
                       <span style={{ fontSize: 20 }}>✅</span>
                       <div style={{ flex: 1 }}>
-                        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--green)' }}>Ubicación detectada</p>
-                        <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 1 }}>{form.location || 'Coordenadas guardadas'}</p>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--green)' }}>{t('register.locationDetected')}</p>
+                        <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 1 }}>{form.location || t('register.locationCoords')}</p>
                       </div>
                     </div>
                   ) : form.locationDenied ? (
                     <div style={{ background: 'var(--bg-3)', border: '1px solid var(--border-2)', borderRadius: 'var(--radius)', padding: '12px 14px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                         <span style={{ fontSize: 16 }}>⚠️</span>
-                        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--red)' }}>Ubicación requerida</p>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--red)' }}>{t('register.locationRequired')}</p>
                       </div>
                       <p style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.5, marginBottom: 8 }}>
-                        Necesitamos tu ubicación para mostrarte rutas y eventos cerca de ti. Activa el permiso en tu navegador:
+                        {t('register.locationNeeded')}
                       </p>
                       <p style={{ fontSize: 12, color: 'var(--text-2)', lineHeight: 1.6 }}>
-                        <strong>iPhone:</strong> Ajustes → Safari → Ubicación → Permitir<br />
-                        <strong>Android:</strong> Ajustes del navegador → Permisos → Ubicación
+                        <strong>iPhone:</strong> {t('register.locationIphone').replace('iPhone: ', '')}<br />
+                        <strong>Android:</strong> {t('register.locationAndroid').replace('Android: ', '')}
                       </p>
                       <button
                         type="button"
@@ -606,6 +596,10 @@ export default function AuthPage() {
                             set('latitude', pos.coords.latitude)
                             set('longitude', pos.coords.longitude)
                             set('locationDenied', false)
+                            // Detect language from GPS coordinates
+                            const lang = detectLanguage(pos.coords.latitude, pos.coords.longitude)
+                            set('preferredLanguage', lang)
+                            useStore.getState().setLocale(lang)
                             // Reverse geocode to get city name
                             try {
                               const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=es`)
@@ -618,15 +612,15 @@ export default function AuthPage() {
                           }
                         }}
                       >
-                        🔄 Reintentar
+                        {t('register.locationRetry')}
                       </button>
                     </div>
                   ) : (
                     <div style={{ background: 'var(--bg-3)', borderRadius: 'var(--radius)', padding: '14px', display: 'flex', alignItems: 'center', gap: 10 }}>
                       <span style={{ fontSize: 20 }}>📍</span>
                       <div style={{ flex: 1 }}>
-                        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>Activa tu ubicación</p>
-                        <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 1 }}>Obligatorio para ver rutas en tu zona</p>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{t('register.locationActivate')}</p>
+                        <p style={{ fontSize: 11, color: 'var(--text-3)', marginTop: 1 }}>{t('register.locationMandatory')}</p>
                       </div>
                       <button
                         type="button"
@@ -639,6 +633,10 @@ export default function AuthPage() {
                             set('latitude', pos.coords.latitude)
                             set('longitude', pos.coords.longitude)
                             set('locationDenied', false)
+                            // Detect language from GPS coordinates
+                            const lang = detectLanguage(pos.coords.latitude, pos.coords.longitude)
+                            set('preferredLanguage', lang)
+                            useStore.getState().setLocale(lang)
                             // Reverse geocode to get city name
                             try {
                               const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=es`)
@@ -651,26 +649,30 @@ export default function AuthPage() {
                           }
                         }}
                       >
-                        Activar
+                        {t('register.locationActivateBtn')}
                       </button>
                     </div>
                   )}
                   {errors.location && <span className="form-error">{errors.location}</span>}
-                  <span className="form-hint">Usamos GPS para mostrarte eventos cerca de ti.</span>
+                  <span className="form-hint">{t('register.locationGpsHint')}</span>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Nivel de experiencia</label>
+                  <label className="form-label">{t('register.experience')}</label>
                   <select className="form-select" value={form.experience} onChange={(e) => set('experience', e.target.value)}>
-                    <option value="">Selecciona tu nivel...</option>
-                    {EXPERIENCE_OPTIONS.map((o) => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
+                    <option value="">{t('register.experiencePlaceholder')}</option>
+                    {[
+                      { value: 'beginner', key: 'experience.beginner' },
+                      { value: 'medio', key: 'experience.medio' },
+                      { value: 'advanced', key: 'experience.advanced' },
+                    ].map((o) => (
+                      <option key={o.value} value={o.value}>{t(o.key)}</option>
                     ))}
                   </select>
                   {errors.experience && <span className="form-error">{errors.experience}</span>}
                 </div>
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button type="button" className="btn btn-ghost" onClick={() => setStep(1)}>← Atrás</button>
-                  <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Siguiente →</button>
+                  <button type="button" className="btn btn-ghost" onClick={() => setStep(1)}>{t('auth.back')}</button>
+                  <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>{t('auth.next')}</button>
                 </div>
               </form>
             )}
@@ -680,18 +682,18 @@ export default function AuthPage() {
               <form onSubmit={handleRegister} className="stack">
                 {/* Instagram */}
                 <div className="form-group">
-                  <label className="form-label">Instagram <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>(opcional)</span></label>
-                  <input className="form-input" type="text" placeholder="@tuusuario"
+                  <label className="form-label">{t('register.instagram')}</label>
+                  <input className="form-input" type="text" placeholder={t('register.instagramPlaceholder')}
                     value={form.instaHandle} onChange={(e) => set('instaHandle', e.target.value)} />
                 </div>
 
                 {/* Promo code */}
                 <div className="form-group">
-                  <label className="form-label">Código promocional <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>(opcional)</span></label>
+                  <label className="form-label">{t('register.promoCode')}</label>
                   <input
                     className="form-input"
                     type="text"
-                    placeholder="Ej: RUTILLAS100"
+                    placeholder={t('register.promoCodePlaceholder')}
                     value={form.promoCode || ''}
                     onChange={(e) => set('promoCode', e.target.value.toUpperCase())}
                     style={{ textTransform: 'uppercase', letterSpacing: '0.08em' }}
@@ -716,20 +718,25 @@ export default function AuthPage() {
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">¿Cómo nos conociste?</label>
+                  <label className="form-label">{t('register.heardFrom')}</label>
                   <select className="form-select" value={form.heardFrom} onChange={(e) => set('heardFrom', e.target.value)}>
-                    <option value="">Selecciona...</option>
-                    {HEARD_FROM_OPTIONS.map((o) => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
+                    <option value="">{t('register.heardFromPlaceholder')}</option>
+                    {[
+                      { value: 'instagram', key: 'heardFrom.instagram' },
+                      { value: 'tiktok', key: 'heardFrom.tiktok' },
+                      { value: 'friends', key: 'heardFrom.friends' },
+                      { value: 'other', key: 'heardFrom.other' },
+                    ].map((o) => (
+                      <option key={o.value} value={o.value}>{t(o.key)}</option>
                     ))}
                   </select>
                   {errors.heardFrom && <span className="form-error">{errors.heardFrom}</span>}
                 </div>
 
                 <div style={{ display: 'flex', gap: 8 }}>
-                  <button type="button" className="btn btn-ghost" onClick={() => setStep(2)}>← Atrás</button>
+                  <button type="button" className="btn btn-ghost" onClick={() => setStep(2)}>{t('auth.back')}</button>
                   <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={loading}>
-                    {loading ? <span className="spinner" /> : 'Crear cuenta 🏍️'}
+                    {loading ? <span className="spinner" /> : `${t('auth.register')} 🏍️`}
                   </button>
                 </div>
                 <Turnstile onVerify={setCaptchaToken} onExpire={() => setCaptchaToken(null)} />

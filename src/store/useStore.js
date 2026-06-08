@@ -15,6 +15,10 @@ const useStore = create(
           const data = await api.login({ username: email, email, password, captcha_token: captchaToken })
           setToken(data.access)
           set({ currentUser: data.user, token: data.access })
+          // Set locale from user preference
+          if (data.user?.preferred_language) {
+            set({ locale: data.user.preferred_language })
+          }
           return { user: data.user }
         } catch (e) {
           return { error: e.data?.error || 'Email o contraseña incorrectos' }
@@ -45,6 +49,7 @@ const useStore = create(
             heard_from: data.heardFrom || '',
             promo_code: data.promoCode || '',
             captcha_token: data.captchaToken || '',
+            preferred_language: data.preferredLanguage || 'es',
           })
           return { ok: true, payment_url: response?.payment_url || null }
         } catch (e) {
@@ -58,6 +63,9 @@ const useStore = create(
         try {
           const user = await api.me()
           set({ currentUser: user })
+          if (user?.preferred_language) {
+            set({ locale: user.preferred_language })
+          }
         } catch (e) {
           clearToken()
           set({ currentUser: null, token: null })
@@ -308,6 +316,10 @@ const useStore = create(
           return { error: e.data?.error || 'Error al dejar de seguir' }
         }
       },
+
+      // ── Language ────────────────────────────────────────────────────────
+      locale: 'es',
+      setLocale: (locale) => set({ locale }),
 
       // ── Admin users ───────────────────────────────────────────────────────
       adminUsers: [],

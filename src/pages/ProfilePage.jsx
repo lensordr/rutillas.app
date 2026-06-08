@@ -6,6 +6,7 @@ import { useToast } from '../components/Toast'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { sanitizeText, sanitizeEmail, sanitizeInstagram, validatePassword } from '../security'
+import { useT } from '../i18n/useT'
 
 const EXPERIENCE_LABELS = { beginner: 'Principiante', medio: 'Medio', advanced: 'Avanzado' }
 const EXPERIENCE_COLORS = { beginner: 'var(--green)', medio: 'var(--yellow)', advanced: 'var(--accent)' }
@@ -31,6 +32,7 @@ const HEARD_FROM_LABELS = { instagram: 'Instagram', tiktok: 'TikTok', friends: '
 function EditProfileModal({ onClose }) {
   const currentUser = useStore((s) => s.currentUser)
   const toast = useToast()
+  const t = useT()
 
   const [form, setForm] = useState({
     first_name: currentUser?.first_name || '',
@@ -56,13 +58,13 @@ function EditProfileModal({ onClose }) {
   const handleSave = async (e) => {
     e.preventDefault()
     const errs = {}
-    if (!form.first_name.trim()) errs.first_name = 'Nombre requerido'
-    if (!form.email.trim()) errs.email = 'Email requerido'
-    if (form.newPassword && form.newPassword.length < 6) errs.newPassword = 'Mínimo 6 caracteres'
+    if (!form.first_name.trim()) errs.first_name = t('validation.nameRequired')
+    if (!form.email.trim()) errs.email = t('validation.emailRequired')
+    if (form.newPassword && form.newPassword.length < 6) errs.newPassword = t('validation.passwordMinNew')
     
     // Require current password for email or password changes
     if ((emailChanged || form.newPassword) && !form.currentPassword) {
-      errs.currentPassword = 'Contraseña actual requerida para cambiar email o contraseña'
+      errs.currentPassword = t('validation.currentPasswordRequired')
     }
 
     // Validate new password strength
@@ -92,7 +94,7 @@ function EditProfileModal({ onClose }) {
     if (result?.error) {
       toast(result.error, 'error')
     } else {
-      toast('Perfil actualizado ✓', 'success')
+      toast(t('profile.updated'), 'success')
       onClose()
     }
   }
@@ -110,7 +112,7 @@ function EditProfileModal({ onClose }) {
             {(form.first_name || '?')[0]?.toUpperCase()}
           </div>
           <div>
-            <h2 className="modal-title" style={{ marginBottom: 2 }}>Editar perfil</h2>
+            <h2 className="modal-title" style={{ marginBottom: 2 }}>{t('profile.editTitle')}</h2>
             {isAdmin && <span className="badge badge-approved"><IconShield size={10} /> Admin</span>}
           </div>
         </div>
@@ -118,53 +120,53 @@ function EditProfileModal({ onClose }) {
         <form onSubmit={handleSave} className="stack">
 
           {/* ── Personal info ── */}
-          <p className="section-title" style={{ marginBottom: 4 }}>Información personal</p>
+          <p className="section-title" style={{ marginBottom: 4 }}>{t('profile.personalInfo')}</p>
 
           <div className="form-group">
-            <label className="form-label">Nombre</label>
+            <label className="form-label">{t('profile.firstName')}</label>
             <input className="form-input" type="text" value={form.first_name}
-              onChange={(e) => set('first_name', e.target.value)} placeholder="Tu nombre" />
+              onChange={(e) => set('first_name', e.target.value)} placeholder={t('profile.firstNamePlaceholder')} />
             {errors.first_name && <span className="form-error">{errors.first_name}</span>}
           </div>
 
           <div className="form-group">
-            <label className="form-label">Apellido</label>
+            <label className="form-label">{t('profile.lastName')}</label>
             <input className="form-input" type="text" value={form.last_name}
-              onChange={(e) => set('last_name', e.target.value)} placeholder="Tu apellido" />
+              onChange={(e) => set('last_name', e.target.value)} placeholder={t('profile.lastNamePlaceholder')} />
           </div>
 
           <div className="form-group">
-            <label className="form-label">Email</label>
+            <label className="form-label">{t('profile.email')}</label>
             <input className="form-input" type="email" value={form.email}
-              onChange={(e) => set('email', e.target.value)} placeholder="tu@email.com" />
+              onChange={(e) => set('email', e.target.value)} placeholder={t('profile.emailPlaceholder')} />
             {errors.email && <span className="form-error">{errors.email}</span>}
           </div>
 
           {!isAdmin && (
             <div className="form-group">
-              <label className="form-label">Ciudad / Ubicación</label>
+              <label className="form-label">{t('profile.location')}</label>
               <input className="form-input" type="text" value={form.location}
-                onChange={(e) => set('location', e.target.value)} placeholder="Madrid, Barcelona..." />
+                onChange={(e) => set('location', e.target.value)} placeholder={t('profile.locationPlaceholder')} />
             </div>
           )}
 
           <div className="form-group">
-            <label className="form-label">Instagram (opcional)</label>
+            <label className="form-label">{t('profile.instagram')}</label>
             <input className="form-input" type="text" value={form.insta_handle}
-              onChange={(e) => set('insta_handle', e.target.value)} placeholder="@tuusuario" />
+              onChange={(e) => set('insta_handle', e.target.value)} placeholder={t('profile.instagramPlaceholder')} />
           </div>
 
           {/* ── Moto info (non-admin only) ── */}
           {!isAdmin && (
             <>
               <div style={{ height: 1, background: 'var(--border)' }} />
-              <p className="section-title" style={{ marginBottom: 4 }}>Tu moto</p>
+              <p className="section-title" style={{ marginBottom: 4 }}>{t('profile.motoSection')}</p>
 
               <div className="form-group">
-                <label className="form-label">Tipo de moto</label>
+                <label className="form-label">{t('profile.motoType')}</label>
                 <select className="form-select" value={form.moto_type}
                   onChange={(e) => set('moto_type', e.target.value)}>
-                  <option value="">Selecciona el tipo...</option>
+                  <option value="">{t('profile.motoTypePlaceholder')}</option>
                   {MOTO_TYPE_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>{o.label}</option>
                   ))}
@@ -172,16 +174,16 @@ function EditProfileModal({ onClose }) {
               </div>
 
               <div className="form-group">
-                <label className="form-label">Marca y modelo</label>
+                <label className="form-label">{t('profile.motoModel')}</label>
                 <input className="form-input" type="text" value={form.moto_model}
-                  onChange={(e) => set('moto_model', e.target.value)} placeholder="Yamaha MT-07..." />
+                  onChange={(e) => set('moto_model', e.target.value)} placeholder={t('profile.motoModelPlaceholder')} />
               </div>
 
               <div className="form-group">
-                <label className="form-label">Nivel de experiencia</label>
+                <label className="form-label">{t('profile.experience')}</label>
                 <select className="form-select" value={form.experience}
                   onChange={(e) => set('experience', e.target.value)}>
-                  <option value="">Selecciona tu nivel...</option>
+                  <option value="">{t('profile.experiencePlaceholder')}</option>
                   {EXPERIENCE_OPTIONS.map((o) => (
                     <option key={o.value} value={o.value}>{o.label}</option>
                   ))}
@@ -193,35 +195,35 @@ function EditProfileModal({ onClose }) {
 
           {/* ── Password ── */}
           <div style={{ height: 1, background: 'var(--border)' }} />
-          <p className="section-title" style={{ marginBottom: 4 }}>Cambiar contraseña</p>
+          <p className="section-title" style={{ marginBottom: 4 }}>{t('profile.changePassword')}</p>
 
           {/* Current password — required for email/password changes */}
           {(emailChanged || form.newPassword) && (
             <div className="form-group">
-              <label className="form-label">Contraseña actual <span style={{ color: 'var(--accent)', fontWeight: 700 }}>*</span></label>
+              <label className="form-label">{t('profile.currentPassword')} <span style={{ color: 'var(--accent)', fontWeight: 700 }}>*</span></label>
               <input className="form-input" type="password" value={form.currentPassword}
-                onChange={(e) => set('currentPassword', e.target.value)} placeholder="Tu contraseña actual" />
+                onChange={(e) => set('currentPassword', e.target.value)} placeholder={t('profile.currentPasswordPlaceholder')} />
               {errors.currentPassword && <span className="form-error">{errors.currentPassword}</span>}
               <span className="form-hint" style={{ color: 'var(--accent)' }}>
-                Requerida para cambiar {emailChanged && form.newPassword ? 'email y contraseña' : emailChanged ? 'email' : 'contraseña'}
+                {t('profile.currentPasswordRequired', { field: emailChanged && form.newPassword ? 'email y contraseña' : emailChanged ? 'email' : 'contraseña' })}
               </span>
             </div>
           )}
 
           <div className="form-group">
-            <label className="form-label">Nueva contraseña</label>
+            <label className="form-label">{t('profile.newPassword')}</label>
             <input className="form-input" type="password" value={form.newPassword}
-              onChange={(e) => set('newPassword', e.target.value)} placeholder="Dejar vacío para no cambiar" />
+              onChange={(e) => set('newPassword', e.target.value)} placeholder={t('profile.newPasswordPlaceholder')} />
             {errors.newPassword && <span className="form-error">{errors.newPassword}</span>}
           </div>
 
           {/* ── Actions ── */}
           <div style={{ display: 'flex', gap: 8, paddingTop: 4 }}>
             <button type="button" className="btn btn-ghost" onClick={onClose} style={{ flex: 1 }}>
-              Cancelar
+              {t('profile.cancel')}
             </button>
             <button type="submit" className="btn btn-primary" style={{ flex: 2 }} disabled={saving}>
-              {saving ? <span className="spinner" /> : 'Guardar cambios'}
+              {saving ? <span className="spinner" /> : t('profile.save')}
             </button>
           </div>
         </form>
@@ -301,6 +303,7 @@ export default function ProfilePage() {
   const routes = useStore((s) => s.routes)
   const toast = useToast()
   const [showEdit, setShowEdit] = useState(false)
+  const t = useT()
 
   useEffect(() => {
     useStore.getState().refreshUser()
@@ -317,7 +320,7 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     useStore.getState().logout()
-    toast('Hasta pronto 👋', 'success')
+    toast(t('profile.logoutToast'), 'success')
     navigate('/auth')
   }
 
@@ -391,7 +394,7 @@ export default function ProfilePage() {
           <button
             className="btn btn-ghost btn-icon"
             onClick={() => setShowEdit(true)}
-            aria-label="Editar perfil"
+            aria-label={t('profile.editTitle')}
             style={{ flexShrink: 0 }}
           >
             <IconEdit size={18} />
@@ -404,11 +407,11 @@ export default function ProfilePage() {
         {/* ── Stats (non-admin) ── */}
         {!currentUser?.is_staff && (
           <div style={{ marginBottom: 24 }}>
-            <p className="section-title">Mis rutas</p>
+            <p className="section-title">{t('profile.stats')}</p>
             <div style={{ display: 'flex', gap: 10 }}>
-              <StatCard value={totalRoutes} label="Rutas totales" accent />
-              <StatCard value={currentUser?.completed_routes ?? completedRoutes} label="Completadas" />
-              <StatCard value={upcomingRoutes} label="Próximas" />
+              <StatCard value={totalRoutes} label={t('profile.totalRoutes')} accent />
+              <StatCard value={currentUser?.completed_routes ?? completedRoutes} label={t('profile.completedRoutes')} />
+              <StatCard value={upcomingRoutes} label={t('profile.upcomingRoutes')} />
             </div>
           </div>
         )}
@@ -416,25 +419,25 @@ export default function ProfilePage() {
         {/* ── Rider info (non-admin) ── */}
         {!currentUser?.is_staff && (
           <div style={{ marginBottom: 24 }}>
-            <p className="section-title">Mi perfil rider</p>
+            <p className="section-title">{t('profile.riderInfo')}</p>
             <div style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '4px 16px', boxShadow: 'var(--shadow-sm)' }}>
-              <InfoRow label="Tipo de moto" value={MOTO_TYPE_LABELS[currentUser?.moto_type]} />
-              <InfoRow label="Moto" value={currentUser?.moto_model} highlight />
-              <InfoRow label="Ubicación" value={currentUser?.location} />
-              <InfoRow label="Nivel" value={EXPERIENCE_LABELS[currentUser?.experience]} />
-              <InfoRow label="Suscriptor" value={currentUser?.is_subscribed ? (currentUser?.promo_expires_at ? `⭐ Promo hasta ${new Date(currentUser.promo_expires_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}` : '⭐ Sí') : currentUser?.is_free_user ? '🆓 Usuario gratuito' : 'No'} />
+              <InfoRow label={t('profile.motoTypeLabel')} value={MOTO_TYPE_LABELS[currentUser?.moto_type]} />
+              <InfoRow label={t('profile.motoLabel')} value={currentUser?.moto_model} highlight />
+              <InfoRow label={t('profile.locationLabel')} value={currentUser?.location} />
+              <InfoRow label={t('profile.levelLabel')} value={EXPERIENCE_LABELS[currentUser?.experience]} />
+              <InfoRow label={t('profile.subscriberLabel')} value={currentUser?.is_subscribed ? (currentUser?.promo_expires_at ? t('profile.subscriberPromo', { date: new Date(currentUser.promo_expires_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) }) : t('profile.subscriberYes')) : currentUser?.is_free_user ? t('profile.subscriberFree') : t('profile.subscriberNo')} />
               {currentUser?.insta_handle && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid var(--border)' }}>
                   <span style={{ fontSize: 12, color: 'var(--text-3)', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase' }}>Instagram</span>
                   <InstagramPill handle={currentUser.insta_handle} />
                 </div>
               )}
-              <InfoRow label="Nos conoció por" value={HEARD_FROM_LABELS[currentUser?.heard_from]} />
+              <InfoRow label={t('profile.heardFromLabel')} value={HEARD_FROM_LABELS[currentUser?.heard_from]} />
             </div>
             {currentUser?.is_subscribed && !currentUser?.is_free_user && (
               <div style={{ marginTop: 12, background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '14px 16px', boxShadow: 'var(--shadow-sm)' }}>
                 <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 10 }}>
-                  Para gestionar o cancelar tu suscripción, revisa el email de confirmación de pago de Square.
+                  {t('profile.manageSubscription')}
                 </p>
                 <a
                   href="https://squareup.com/login"
@@ -443,7 +446,7 @@ export default function ProfilePage() {
                   className="btn btn-ghost btn-full btn-sm"
                   style={{ textDecoration: 'none' }}
                 >
-                  Gestionar suscripción en Square →
+                  {t('profile.manageSubscriptionBtn')}
                 </a>
               </div>
             )}
@@ -453,7 +456,7 @@ export default function ProfilePage() {
         {/* ── Admin instagram ── */}
         {currentUser?.is_staff && currentUser?.insta_handle && (
           <div style={{ marginBottom: 24 }}>
-            <p className="section-title">Redes sociales</p>
+            <p className="section-title">{t('profile.socialMedia')}</p>
             <div style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '16px', boxShadow: 'var(--shadow-sm)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={{ fontSize: 13, color: 'var(--text-2)' }}>Instagram</span>
               <InstagramPill handle={currentUser.insta_handle} />
@@ -464,7 +467,7 @@ export default function ProfilePage() {
         {/* ── Route history ── */}
         {myRoutes.length > 0 && (
           <div style={{ marginBottom: 24 }}>
-            <p className="section-title">Historial de rutas</p>
+            <p className="section-title">{t('profile.routeHistory')}</p>
             <div className="stack">
               {myRoutes.map((r) => (
                 <div key={r.id} onClick={() => navigate(`/events/${r.id}`)} style={{ background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', padding: '14px 16px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 12, boxShadow: 'var(--shadow-sm)' }}>
@@ -484,7 +487,7 @@ export default function ProfilePage() {
                     </p>
                   </div>
                   <span className={`badge badge-${r.status}`}>
-                    {r.status === 'active' ? 'En curso' : r.status === 'upcoming' ? 'Próximo' : 'Finalizado'}
+                    {r.status === 'active' ? t('routes.status.active') : r.status === 'upcoming' ? t('routes.status.upcoming') : t('routes.status.ended')}
                   </span>
                 </div>
               ))}
@@ -494,7 +497,7 @@ export default function ProfilePage() {
 
         {/* Logout */}
         <button className="btn btn-danger btn-full" onClick={handleLogout}>
-          <IconLogout size={18} /> Cerrar sesión
+          <IconLogout size={18} /> {t('profile.logout')}
         </button>
       </div>
 

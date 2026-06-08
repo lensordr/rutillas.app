@@ -4,6 +4,7 @@ import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
 import useStore from '../store/useStore'
 import { IconBell, IconCheck, IconTrash } from '../components/Icons'
+import { useT } from '../i18n/useT'
 
 function NotifIcon({ type }) {
   const icons = { join_request: '🏍️', approved: '✅', rejected: '❌', new_message: '💬' }
@@ -13,6 +14,7 @@ function NotifIcon({ type }) {
 export default function NotificationsPage() {
   const navigate = useNavigate()
   const notifications = useStore((s) => s.notifications)
+  const t = useT()
 
   const hasUnread = notifications.some((n) => !n.read)
 
@@ -23,8 +25,8 @@ export default function NotificationsPage() {
   }, [])
 
   useEffect(() => {
-    const t = setTimeout(() => useStore.getState().markAllNotificationsRead(), 1500)
-    return () => clearTimeout(t)
+    const timer = setTimeout(() => useStore.getState().markAllNotificationsRead(), 1500)
+    return () => clearTimeout(timer)
   }, [])
 
   const handleClick = (notif) => {
@@ -38,12 +40,12 @@ export default function NotificationsPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <IconBell size={22} />
           <h1 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 26, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Notificaciones
+            {t('notifications.title')}
           </h1>
         </div>
         {hasUnread && (
           <button className="btn btn-ghost btn-sm" onClick={() => useStore.getState().markAllNotificationsRead()}>
-            <IconCheck size={14} /> Leer todo
+            <IconCheck size={14} /> {t('notifications.markAllRead')}
           </button>
         )}
       </div>
@@ -52,8 +54,8 @@ export default function NotificationsPage() {
         {notifications.length === 0 ? (
           <div className="empty-state">
             <IconBell size={48} />
-            <p className="empty-state-title">Sin notificaciones</p>
-            <p style={{ fontSize: 13, color: 'var(--text-3)' }}>Aquí aparecerán tus avisos</p>
+            <p className="empty-state-title">{t('notifications.empty')}</p>
+            <p style={{ fontSize: 13, color: 'var(--text-3)' }}>{t('notifications.emptyHint')}</p>
           </div>
         ) : (
           notifications.map((notif) => (
@@ -84,8 +86,8 @@ export default function NotificationsPage() {
                   style={{ background: 'none', border: 'none', padding: 4, cursor: 'pointer', color: 'var(--text-3)', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: notif.read ? 0.7 : 0.4, transition: 'opacity 0.15s, color 0.15s' }}
                   onMouseEnter={(e) => { e.currentTarget.style.opacity = '1'; e.currentTarget.style.color = 'var(--accent)' }}
                   onMouseLeave={(e) => { e.currentTarget.style.opacity = notif.read ? '0.7' : '0.4'; e.currentTarget.style.color = 'var(--text-3)' }}
-                  title="Eliminar notificación"
-                  aria-label="Eliminar notificación"
+                  title={t('notifications.delete')}
+                  aria-label={t('notifications.delete')}
                 >
                   <IconTrash size={15} />
                 </button>

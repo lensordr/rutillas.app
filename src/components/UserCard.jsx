@@ -1,5 +1,6 @@
 import useStore from '../store/useStore'
 import { IconMapPin, IconUsers } from './Icons'
+import { useT } from '../i18n/useT'
 
 const EXPERIENCE_LABELS = {
   beginner: '🟢 Principiante',
@@ -22,6 +23,7 @@ export default function UserCard({ user }) {
   const currentUser = useStore((s) => s.currentUser)
   const followUser = useStore((s) => s.followUser)
   const unfollowUser = useStore((s) => s.unfollowUser)
+  const t = useT()
 
   const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ') || 'Rider'
   const motoLabel = MOTO_TYPE_LABELS[user.moto_type] || user.moto_type
@@ -110,7 +112,7 @@ export default function UserCard({ user }) {
       {/* Footer: counts + follow button */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', gap: 12, fontSize: 12, color: 'var(--text-3)' }}>
-          <span><strong style={{ color: 'var(--text)' }}>{user.followers_count || 0}</strong> seguidores</span>
+          <span><strong style={{ color: 'var(--text)' }}>{user.followers_count || 0}</strong> {t('users.followers', { count: '' }).trim()}</span>
           <span><strong style={{ color: 'var(--text)' }}>{user.following_count || 0}</strong> siguiendo</span>
         </div>
         {!isSelf && (
@@ -119,7 +121,7 @@ export default function UserCard({ user }) {
             className={user.is_followed ? 'btn btn-ghost btn-sm' : 'btn btn-primary btn-sm'}
             style={{ fontSize: 11, padding: '5px 12px' }}
           >
-            {user.is_followed ? 'Siguiendo' : 'Seguir'}
+            {user.is_followed ? t('users.unfollow') : t('users.follow')}
           </button>
         )}
       </div>

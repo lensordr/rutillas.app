@@ -5,6 +5,7 @@ import { es } from 'date-fns/locale'
 import useStore from '../store/useStore'
 import { IconMapPin, IconClock, IconUsers, IconCalendar, IconPlus, IconBack } from '../components/Icons'
 import { useToast } from '../components/Toast'
+import { useT } from '../i18n/useT'
 
 // ─── Create Route Modal ───────────────────────────────────────────────────────
 function CreateRouteModal({ onClose }) {
@@ -16,17 +17,18 @@ function CreateRouteModal({ onClose }) {
     title: '', description: '', city: '', location_detail: '',
     date: '', end_date: '', max_participants: 20, route_url: '',
   })
+  const t = useT()
 
   const isSubscribed = currentUser?.is_subscribed || currentUser?.is_free_user || currentUser?.is_staff
   const set = (f, v) => { setForm(p => ({ ...p, [f]: v })); setErrors(p => ({ ...p, [f]: '' })) }
 
   const validate = () => {
     const e = {}
-    if (!form.title.trim()) e.title = 'Requerido'
-    if (!form.city.trim()) e.city = 'Requerido'
-    if (!form.date) e.date = 'Requerido'
-    if (!form.end_date) e.end_date = 'Requerido'
-    if (form.date && form.end_date && new Date(form.end_date) <= new Date(form.date)) e.end_date = 'Debe ser posterior al inicio'
+    if (!form.title.trim()) e.title = t('validation.required')
+    if (!form.city.trim()) e.city = t('validation.required')
+    if (!form.date) e.date = t('validation.required')
+    if (!form.end_date) e.end_date = t('validation.required')
+    if (form.date && form.end_date && new Date(form.end_date) <= new Date(form.date)) e.end_date = t('validation.endDateAfterStart')
     setErrors(e)
     return !Object.keys(e).length
   }
@@ -52,23 +54,23 @@ function CreateRouteModal({ onClose }) {
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
         <div className="modal-handle" />
-        <h2 className="modal-title">Nueva ruta 🏍️</h2>
+        <h2 className="modal-title">{t('routes.create.title')}</h2>
         {!isSubscribed ? (
           <div style={{ textAlign: 'center', padding: '8px 0 16px' }}>
             <div style={{ fontSize: 40, marginBottom: 12 }}>🔒</div>
-            <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 20, fontWeight: 900, textTransform: 'uppercase', marginBottom: 8 }}>Suscripción requerida</p>
+            <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 20, fontWeight: 900, textTransform: 'uppercase', marginBottom: 8 }}>{t('routes.create.subscriptionRequired')}</p>
             <p style={{ fontSize: 14, color: 'var(--text-2)', marginBottom: 20, lineHeight: 1.5 }}>
-              Necesitas una suscripción para crear rutas y acceder a todos los detalles.
+              {t('routes.create.subscriptionDesc')}
             </p>
             <div style={{ background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', borderRadius: 'var(--radius-lg)', padding: '10px 16px', marginBottom: 20 }}>
-              <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 28, fontWeight: 900, color: 'var(--accent)' }}>3,99€ <span style={{ fontSize: 14, fontWeight: 600 }}>/mes</span></p>
-              <p style={{ fontSize: 12, color: 'var(--text-2)', marginTop: 2 }}>Acceso completo · Cancela cuando quieras</p>
+              <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 28, fontWeight: 900, color: 'var(--accent)' }}>{t('routes.create.price')} <span style={{ fontSize: 14, fontWeight: 600 }}>{t('routes.create.priceUnit')}</span></p>
+              <p style={{ fontSize: 12, color: 'var(--text-2)', marginTop: 2 }}>{t('routes.create.priceDesc')}</p>
             </div>
             <a href="https://square.link/u/4AiXGpLe" target="_blank" rel="noopener noreferrer"
               className="btn btn-primary btn-full btn-lg" style={{ textDecoration: 'none', marginBottom: 10 }}>
-              🏍️ Suscribirse — 3,99€/mes
+              {t('routes.create.subscribeBtn')}
             </a>
-            <button className="btn btn-ghost btn-full" onClick={onClose}>Cancelar</button>
+            <button className="btn btn-ghost btn-full" onClick={onClose}>{t('routes.create.cancel')}</button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="stack">
@@ -78,51 +80,51 @@ function CreateRouteModal({ onClose }) {
             </div>
           )}
           <div className="form-group">
-            <label className="form-label">Título *</label>
-            <input className="form-input" value={form.title} onChange={e => set('title', e.target.value)} placeholder="Ej: Ruta por Montserrat" />
+            <label className="form-label">{t('routes.create.titleLabel')}</label>
+            <input className="form-input" value={form.title} onChange={e => set('title', e.target.value)} placeholder={t('routes.create.titlePlaceholder')} />
             {errors.title && <span className="form-error">{errors.title}</span>}
           </div>
           <div className="form-group">
-            <label className="form-label">Descripción</label>
-            <textarea className="form-textarea" value={form.description} onChange={e => set('description', e.target.value)} placeholder="Describe la ruta..." />
+            <label className="form-label">{t('routes.create.description')}</label>
+            <textarea className="form-textarea" value={form.description} onChange={e => set('description', e.target.value)} placeholder={t('routes.create.descriptionPlaceholder')} />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div className="form-group">
-              <label className="form-label">Ciudad *</label>
-              <input className="form-input" value={form.city} onChange={e => set('city', e.target.value)} placeholder="Barcelona" />
+              <label className="form-label">{t('routes.create.city')}</label>
+              <input className="form-input" value={form.city} onChange={e => set('city', e.target.value)} placeholder={t('routes.create.cityPlaceholder')} />
               {errors.city && <span className="form-error">{errors.city}</span>}
             </div>
             <div className="form-group">
-              <label className="form-label">Detalle ubicación</label>
-              <input className="form-input" value={form.location_detail} onChange={e => set('location_detail', e.target.value)} placeholder="Punto de salida" />
+              <label className="form-label">{t('routes.create.locationDetail')}</label>
+              <input className="form-input" value={form.location_detail} onChange={e => set('location_detail', e.target.value)} placeholder={t('routes.create.locationDetailPlaceholder')} />
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div className="form-group">
-              <label className="form-label">Inicio *</label>
+              <label className="form-label">{t('routes.create.startDate')}</label>
               <input className="form-input" type="datetime-local" value={form.date} onChange={e => set('date', e.target.value)} />
               {errors.date && <span className="form-error">{errors.date}</span>}
             </div>
             <div className="form-group">
-              <label className="form-label">Fin *</label>
+              <label className="form-label">{t('routes.create.endDate')}</label>
               <input className="form-input" type="datetime-local" value={form.end_date} onChange={e => set('end_date', e.target.value)} />
               {errors.end_date && <span className="form-error">{errors.end_date}</span>}
             </div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div className="form-group">
-              <label className="form-label">Máx. riders</label>
+              <label className="form-label">{t('routes.create.maxRiders')}</label>
               <input className="form-input" type="number" min="2" max="200" value={form.max_participants} onChange={e => set('max_participants', e.target.value)} />
             </div>
             <div className="form-group">
-              <label className="form-label">Link Google Maps</label>
-              <input className="form-input" type="url" value={form.route_url} onChange={e => set('route_url', e.target.value)} placeholder="https://maps.google.com/..." />
+              <label className="form-label">{t('routes.create.googleMaps')}</label>
+              <input className="form-input" type="url" value={form.route_url} onChange={e => set('route_url', e.target.value)} placeholder={t('routes.create.googleMapsPlaceholder')} />
             </div>
           </div>
           <div style={{ display: 'flex', gap: 8, paddingTop: 4 }}>
-            <button type="button" className="btn btn-ghost" onClick={onClose} style={{ flex: 1 }}>Cancelar</button>
+            <button type="button" className="btn btn-ghost" onClick={onClose} style={{ flex: 1 }}>{t('routes.create.cancel')}</button>
             <button type="submit" className="btn btn-primary" style={{ flex: 2 }} disabled={saving}>
-              {saving ? <span className="spinner" /> : 'Crear ruta'}
+              {saving ? <span className="spinner" /> : t('routes.create.submit')}
             </button>
           </div>
           </form>
@@ -135,6 +137,7 @@ function CreateRouteModal({ onClose }) {
 function EventRow({ event, onClick }) {
   const currentUser = useStore((s) => s.currentUser)
   const isSubscribed = currentUser?.is_subscribed || currentUser?.is_free_user || currentUser?.is_staff
+  const t = useT()
 
   return (
     <div className="event-card" onClick={onClick} role="button" tabIndex={0}
@@ -152,12 +155,12 @@ function EventRow({ event, onClick }) {
         {event.status === 'active' && (
           <div style={{ position: 'absolute', top: 10, right: 10, zIndex: 2, display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(255,255,255,0.95)', borderRadius: 100, padding: '4px 10px', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}>
             <span className="live-dot" />
-            <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', color: '#16a34a' }}>LIVE</span>
+            <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', color: '#16a34a' }}>{t('routes.status.live')}</span>
           </div>
         )}
         <div style={{ position: 'absolute', top: 10, left: 10, zIndex: 2 }}>
           <span className={`badge badge-${event.status}`}>
-            {event.status === 'active' ? 'En curso' : event.status === 'upcoming' ? 'Próximo' : event.status === 'full' ? 'Completo' : 'Finalizado'}
+            {event.status === 'active' ? t('routes.status.active') : event.status === 'upcoming' ? t('routes.status.upcoming') : event.status === 'full' ? t('routes.status.full') : t('routes.status.ended')}
           </span>
         </div>
         {/* Lock for non-subscribers */}
@@ -183,23 +186,23 @@ function EventRow({ event, onClick }) {
           </div>
         ) : (
           <p style={{ fontSize: 13, color: 'var(--text-3)', marginTop: 4 }}>
-            Suscríbete para ver los detalles
+            {t('routes.subscribe')}
           </p>
         )}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 14 }}>
           {isSubscribed ? (
             <div className="event-card-riders">
               <IconUsers size={12} />
-              {event.approved_count} / {event.max_participants} riders
+              {t('routes.riders', { count: event.approved_count, max: event.max_participants })}
             </div>
           ) : (
             <div className="event-card-riders">
               <IconUsers size={12} />
-              {event.max_participants} riders max
+              {t('routes.ridersMax', { max: event.max_participants })}
             </div>
           )}
           <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 12, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: isSubscribed ? 'var(--accent)' : 'var(--text-3)' }}>
-            {isSubscribed ? 'Ver →' : '🔒 Ver'}
+            {isSubscribed ? t('routes.view') : t('routes.viewLocked')}
           </span>
         </div>
       </div>
@@ -216,6 +219,7 @@ export default function EventsPage() {
   const [showCreate, setShowCreate] = useState(false)
   const [citySearch, setCitySearch] = useState('')
   const [showCityFilter, setShowCityFilter] = useState(false)
+  const t = useT()
 
   useEffect(() => {
     useStore.getState().fetchRoutes(citySearch || null)
@@ -233,12 +237,12 @@ export default function EventsPage() {
   })
 
   const filters = [
-    { key: 'all', label: 'Todas' },
-    { key: 'active', label: '🔴 En curso' },
-    { key: 'upcoming', label: 'Próximas' },
-    { key: 'ended', label: 'Pasadas' },
-    { key: 'mine', label: 'Mis rutas' },
-    { key: 'joined', label: 'Unidas' },
+    { key: 'all', label: t('routes.filterAll') },
+    { key: 'active', label: t('routes.filterActive') },
+    { key: 'upcoming', label: t('routes.filterUpcoming') },
+    { key: 'ended', label: t('routes.filterEnded') },
+    { key: 'mine', label: t('routes.filterMine') },
+    { key: 'joined', label: t('routes.filterJoined') },
   ]
 
   return (
@@ -249,7 +253,7 @@ export default function EventsPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <IconCalendar size={20} />
             <h1 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 24, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              Rutas
+              {t('routes.title')}
             </h1>
             {citySearch && (
               <span style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13, fontWeight: 700, color: 'var(--accent)', background: 'var(--accent-dim)', borderRadius: 100, padding: '2px 10px' }}>
@@ -259,10 +263,10 @@ export default function EventsPage() {
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
             <button className="btn btn-ghost btn-sm" onClick={() => setShowCityFilter(true)}>
-              🗺️ Ciudad
+              🗺️ {t('routes.city')}
             </button>
             <button className="btn btn-primary btn-sm" onClick={() => setShowCreate(true)}>
-              <IconPlus size={15} /> Nueva
+              <IconPlus size={15} /> {t('routes.new')}
             </button>
           </div>
         </div>
@@ -290,11 +294,11 @@ export default function EventsPage() {
           <div className="empty-state">
             <IconCalendar size={48} />
             <p className="empty-state-title">
-              {filter === 'mine' ? 'No has creado rutas aún' : filter === 'joined' ? 'No te has unido a ninguna ruta' : 'Sin rutas'}
+              {filter === 'mine' ? t('routes.emptyMine') : filter === 'joined' ? t('routes.emptyJoined') : t('routes.empty')}
             </p>
             {filter === 'mine' && (
               <button className="btn btn-primary btn-sm mt-8" onClick={() => setShowCreate(true)}>
-                <IconPlus size={14} /> Crear mi primera ruta
+                <IconPlus size={14} /> {t('routes.createFirst')}
               </button>
             )}
           </div>
@@ -315,14 +319,14 @@ export default function EventsPage() {
         <div className="modal-overlay" onClick={() => setShowCityFilter(false)}>
           <div className="modal" onClick={e => e.stopPropagation()}>
             <div className="modal-handle" />
-            <h2 className="modal-title">Filtrar por ciudad</h2>
+            <h2 className="modal-title">{t('routes.cityFilter.title')}</h2>
 
             {/* Search input */}
             <div style={{ position: 'relative', marginBottom: 16 }}>
               <input
                 className="form-input"
                 type="text"
-                placeholder="🔍 Escribe una ciudad..."
+                placeholder={t('routes.cityFilter.search')}
                 value={citySearch}
                 onChange={(e) => setCitySearch(e.target.value)}
                 style={{ borderRadius: 100 }}
@@ -334,7 +338,7 @@ export default function EventsPage() {
             </div>
 
             {/* Popular cities */}
-            <p className="section-title" style={{ marginBottom: 8 }}>Ciudades populares</p>
+            <p className="section-title" style={{ marginBottom: 8 }}>{t('routes.cityFilter.popular')}</p>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
               {['Barcelona', 'Madrid', 'Valencia', 'Sevilla', 'Málaga', 'Bilbao', 'Zaragoza', 'Girona', 'Tarragona', 'Lleida', 'Murcia', 'Alicante'].map((city) => (
                 <button key={city} onClick={() => { setCitySearch(city); setShowCityFilter(false) }} style={{
@@ -353,7 +357,7 @@ export default function EventsPage() {
             {/* Cities from actual routes */}
             {availableCities.length > 0 && (
               <>
-                <p className="section-title" style={{ marginBottom: 8 }}>Ciudades con rutas activas</p>
+                <p className="section-title" style={{ marginBottom: 8 }}>{t('routes.cityFilter.active')}</p>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
                   {availableCities.map((city) => (
                     <button key={city} onClick={() => { setCitySearch(city); setShowCityFilter(false) }} style={{
@@ -371,11 +375,11 @@ export default function EventsPage() {
             <div style={{ display: 'flex', gap: 8 }}>
               {citySearch && (
                 <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => { setCitySearch(''); setShowCityFilter(false) }}>
-                  Quitar filtro
+                  {t('routes.cityFilter.remove')}
                 </button>
               )}
               <button className="btn btn-primary" style={{ flex: 2 }} onClick={() => setShowCityFilter(false)}>
-                Aplicar
+                {t('routes.cityFilter.apply')}
               </button>
             </div>
           </div>
