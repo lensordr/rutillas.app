@@ -656,7 +656,7 @@ export default function AuthPage() {
                     </div>
                   )}
                   {errors.location && <span className="form-error">{errors.location}</span>}
-                  <span className="form-hint">Usamos GPS para mostrarte eventos cerca de ti. Si estás en el área de Barcelona, acceso gratuito.</span>
+                  <span className="form-hint">Usamos GPS para mostrarte eventos cerca de ti.</span>
                 </div>
                 <div className="form-group">
                   <label className="form-label">Nivel de experiencia</label>
@@ -691,12 +691,28 @@ export default function AuthPage() {
                   <input
                     className="form-input"
                     type="text"
-                    placeholder="Ej: RUTILLAS30"
+                    placeholder="Ej: RUTILLAS100"
                     value={form.promoCode || ''}
                     onChange={(e) => set('promoCode', e.target.value.toUpperCase())}
                     style={{ textTransform: 'uppercase', letterSpacing: '0.08em' }}
                   />
-                  <span className="form-hint">30 días gratis con código válido</span>
+                  <span className="form-hint">Acceso gratuito con código válido</span>
+                </div>
+
+                {/* Instagram follow CTA */}
+                <div style={{ background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', borderRadius: 'var(--radius-lg)', padding: '14px 16px', textAlign: 'center' }}>
+                  <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 10, lineHeight: 1.5 }}>
+                    📸 Síguenos en Instagram para obtener el código de acceso gratuito
+                  </p>
+                  <a
+                    href="https://www.instagram.com/rutillas.app?igsh=OGJnamJnOW83dzRy&utm_source=qr"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-primary btn-sm"
+                    style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
+                  >
+                    📲 Seguir @rutillas.app
+                  </a>
                 </div>
 
                 <div className="form-group">
