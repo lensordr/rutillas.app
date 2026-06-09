@@ -120,7 +120,6 @@ export default function AuthPage() {
   const [errors, setErrors] = useState({})
   const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [showInstall, setShowInstall] = useState(false)
-  const [showEmailConfirm, setShowEmailConfirm] = useState(false)
   const [promoPaymentUrl, setPromoPaymentUrl] = useState(null)
   const [captchaToken, setCaptchaToken] = useState(null)
   const navigate = useNavigate()
@@ -272,28 +271,19 @@ export default function AuthPage() {
       if (result.payment_url) {
         setPromoPaymentUrl(result.payment_url)
       }
-      // Always show install screen first, then email confirm
+      // Send confirmation email automatically
+      try { await api.resendConfirmation(form.email) } catch {}
+      // Show install screen
       setShowInstall(true)
     }
   }
 
   const stepTitles = [t('auth.stepAccount'), t('auth.stepMoto'), t('auth.stepPrefs')]
 
-  // Email confirmation screen shown after registration
-  if (showEmailConfirm) {
-    return (
-      <EmailConfirmScreen
-        email={form.email}
-        paymentUrl={promoPaymentUrl}
-        onDone={() => { setShowEmailConfirm(false); setMode('login'); setStep(1) }}
-      />
-    )
-  }
-
-  // PWA install screen — shown before email confirm screen
+  // PWA install screen — shown after registration
   if (showInstall) {
     const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
-    const goNext = () => { setShowInstall(false); setShowEmailConfirm(true) }
+    const goNext = () => { setShowInstall(false); setMode('login'); setStep(1) }
 
     return (
       <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 24px', background: 'var(--bg)', textAlign: 'center' }}>
@@ -350,6 +340,24 @@ export default function AuthPage() {
         >
           {t('auth.install.skip')}
         </button>
+
+        {/* Email confirmation note */}
+        <div style={{ background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', borderRadius: 'var(--radius-lg)', padding: '14px 18px', marginTop: 20, maxWidth: 340, width: '100%' }}>
+          <p style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.5 }}>
+            ✉️ {t('auth.confirm.activateHint')}
+          </p>
+        </div>
+
+        {promoPaymentUrl && (
+          <div style={{ background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', borderRadius: 'var(--radius-lg)', padding: '16px', marginTop: 12, maxWidth: 340, width: '100%' }}>
+            <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 16, fontWeight: 900, textTransform: 'uppercase', marginBottom: 6 }}>
+              🎉 {t('auth.confirm.discount')}
+            </p>
+            <a href={promoPaymentUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-full btn-sm" style={{ textDecoration: 'none' }}>
+              {t('auth.confirm.subscribeDiscount')}
+            </a>
+          </div>
+        )}
       </div>
     )
   }
