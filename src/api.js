@@ -67,7 +67,12 @@ export const api = {
   resetPassword: (token, password) => request('POST', '/auth/reset-password/', { token, password }, false),
 
   // Users
-  getUsers: (city) => request('GET', `/users/${city ? `?city=${city}` : ''}`),
+  getUsers: (city, country) => {
+    const params = []
+    if (city) params.push(`city=${city}`)
+    if (country) params.push(`country=${country}`)
+    return request('GET', `/users/${params.length ? `?${params.join('&')}` : ''}`)
+  },
 
   // Follow
   followUser: (userId) => request('POST', `/follow/${userId}/`),

@@ -42,6 +42,7 @@ const useStore = create(
             moto_model: data.motoModel || '',
             experience: data.experience || '',
             location: data.location || '',
+            country: data.country || '',
             latitude: data.latitude || null,
             longitude: data.longitude || null,
             insta_handle: data.instaHandle || '',
@@ -273,10 +274,10 @@ const useStore = create(
       users: [],
       usersLoading: false,
 
-      fetchUsers: async (city) => {
+      fetchUsers: async (city, country) => {
         set({ usersLoading: true })
         try {
-          const data = await api.getUsers(city)
+          const data = await api.getUsers(city, country)
           set({ users: data.results || data, usersLoading: false })
         } catch (e) {
           set({ usersLoading: false })

@@ -145,6 +145,7 @@ export default function AuthPage() {
     motoType: '',
     motoModel: '',
     location: '',
+    country: '',
     experience: '',
     // Step 3 — preferences
     instaHandle: '',
@@ -580,12 +581,14 @@ export default function AuthPage() {
                             const lang = detectLanguage(pos.coords.latitude, pos.coords.longitude)
                             set('preferredLanguage', lang)
                             useStore.getState().setLocale(lang)
-                            // Reverse geocode to get city name
+                            // Reverse geocode to get city and country
                             try {
                               const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=es`)
                               const geo = await resp.json()
                               const city = geo.address?.city || geo.address?.town || geo.address?.village || geo.address?.municipality || ''
+                              const country = geo.address?.country || ''
                               if (city) set('location', city)
+                              if (country) set('country', country)
                             } catch {}
                           } catch {
                             set('locationDenied', true)
@@ -617,12 +620,14 @@ export default function AuthPage() {
                             const lang = detectLanguage(pos.coords.latitude, pos.coords.longitude)
                             set('preferredLanguage', lang)
                             useStore.getState().setLocale(lang)
-                            // Reverse geocode to get city name
+                            // Reverse geocode to get city and country
                             try {
                               const resp = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json&accept-language=es`)
                               const geo = await resp.json()
                               const city = geo.address?.city || geo.address?.town || geo.address?.village || geo.address?.municipality || ''
+                              const country = geo.address?.country || ''
                               if (city) set('location', city)
+                              if (country) set('country', country)
                             } catch {}
                           } catch {
                             set('locationDenied', true)

@@ -281,6 +281,7 @@
   "users.empty": "No riders found",
   "users.emptyCity": "Try another city",
   "users.city": "City",
+  "users.country": "Country",
   "users.follow": "Follow",
   "users.unfollow": "Following",
   "users.followers": "{count} followers",

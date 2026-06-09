@@ -8,6 +8,7 @@ export default function UserListPage() {
   const users = useStore((s) => s.users)
   const usersLoading = useStore((s) => s.usersLoading)
   const [citySearch, setCitySearch] = useState('')
+  const [countrySearch, setCountrySearch] = useState('')
   const [showCityFilter, setShowCityFilter] = useState(false)
   const debounceRef = useRef(null)
   const t = useT()
@@ -17,14 +18,14 @@ export default function UserListPage() {
     useStore.getState().fetchUsers()
   }, [])
 
-  // Debounced city search
+  // Debounced search
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
-      useStore.getState().fetchUsers(citySearch || null)
+      useStore.getState().fetchUsers(citySearch || null, countrySearch || null)
     }, 300)
     return () => clearTimeout(debounceRef.current)
-  }, [citySearch])
+  }, [citySearch, countrySearch])
 
   return (
     <div style={{ flex: 1, paddingBottom: 'calc(var(--nav-height) + var(--safe-bottom))' }}>
@@ -39,7 +40,7 @@ export default function UserListPage() {
         borderBottom: '1px solid var(--border)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <IconUsers size={20} />
             <h1 style={{
               fontFamily: "'Barlow Condensed', sans-serif",
@@ -50,6 +51,19 @@ export default function UserListPage() {
             }}>
               {t('users.title')}
             </h1>
+            {countrySearch && (
+              <span style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontSize: 13,
+                fontWeight: 700,
+                color: 'var(--green)',
+                background: 'var(--green-dim)',
+                borderRadius: 100,
+                padding: '2px 10px',
+              }}>
+                🌍 {countrySearch} <span style={{ cursor: 'pointer' }} onClick={() => setCountrySearch('')}>×</span>
+              </span>
+            )}
             {citySearch && (
               <span style={{
                 fontFamily: "'Barlow Condensed', sans-serif",
@@ -109,7 +123,25 @@ export default function UserListPage() {
             <div className="modal-handle" />
             <h2 className="modal-title">{t('routes.cityFilter.title')}</h2>
 
-            {/* Search input */}
+            {/* Country filter */}
+            <p className="section-title" style={{ marginBottom: 8 }}>🌍 {t('users.country')}</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+              {['España', 'Romania', 'Portugal', 'France', 'Italy', 'Germany', 'UK'].map((c) => (
+                <button key={c} onClick={() => { setCountrySearch(countrySearch === c ? '' : c); setShowCityFilter(false) }} style={{
+                  padding: '7px 14px', borderRadius: 100, border: '1px solid',
+                  borderColor: countrySearch === c ? 'var(--green)' : 'var(--border)',
+                  background: countrySearch === c ? 'var(--green-dim)' : 'var(--bg-3)',
+                  color: countrySearch === c ? 'var(--green)' : 'var(--text)',
+                  fontFamily: "'Barlow Condensed', sans-serif", fontSize: 13, fontWeight: 700,
+                  cursor: 'pointer',
+                }}>
+                  {c}
+                </button>
+              ))}
+            </div>
+
+            {/* City search input */}
+            <p className="section-title" style={{ marginBottom: 8 }}>📍 {t('users.city')}</p>
             <div style={{ position: 'relative', marginBottom: 16 }}>
               <input
                 className="form-input"
@@ -118,7 +150,6 @@ export default function UserListPage() {
                 value={citySearch}
                 onChange={(e) => setCitySearch(e.target.value)}
                 style={{ borderRadius: 100 }}
-                autoFocus
               />
               {citySearch && (
                 <button
@@ -151,8 +182,8 @@ export default function UserListPage() {
             </div>
 
             <div style={{ display: 'flex', gap: 8 }}>
-              {citySearch && (
-                <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => { setCitySearch(''); setShowCityFilter(false) }}>
+              {(citySearch || countrySearch) && (
+                <button className="btn btn-ghost" style={{ flex: 1 }} onClick={() => { setCitySearch(''); setCountrySearch(''); setShowCityFilter(false) }}>
                   {t('routes.cityFilter.remove')}
                 </button>
               )}
