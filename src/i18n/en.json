@@ -101,6 +101,9 @@
   "register.heardFromPlaceholder": "Select an option",
   "register.promoCode": "Promo code",
   "register.promoCodePlaceholder": "Optional",
+  "register.promoHint": "Free access with valid code",
+  "register.followInstaCta": "Follow us on Instagram to get the free access code",
+  "register.followInstaBtn": "Follow @rutillas.app",
 
   "motoType.naked": "Naked",
   "motoType.sport": "Sport / Supersport",

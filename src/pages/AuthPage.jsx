@@ -10,49 +10,40 @@ import { detectLanguage } from '../i18n/detectLanguage'
 
 // ─── Email Confirm Screen ─────────────────────────────────────────────────────
 function EmailConfirmScreen({ email, paymentUrl, onDone }) {
-  const [sent, setSent] = useState(false)
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [sent, setSent] = useState(false)
   const t = useT()
 
-  const handleSend = async () => {
-    setLoading(true)
-    setError('')
-    try {
-      await api.resendConfirmation(email)
-      setSent(true)
-    } catch (e) {
-      if (e.status === 429) {
-        setError(t('auth.confirm.tooMany'))
-      } else {
-        setError(t('auth.confirm.sendError'))
+  // Auto-send confirmation email on mount
+  useEffect(() => {
+    const sendEmail = async () => {
+      try {
+        await api.resendConfirmation(email)
+        setSent(true)
+      } catch (e) {
+        if (e.status === 429) {
+          setError(t('auth.confirm.tooMany'))
+        } else {
+          setError(t('auth.confirm.sendError'))
+        }
+        setSent(true) // Still show "sent" UI so user knows to check email
       }
     }
-    setLoading(false)
-  }
+    sendEmail()
+  }, [email])
 
   return (
     <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '32px 24px', background: 'var(--bg)', textAlign: 'center' }}>
-      <div style={{ fontSize: 64, marginBottom: 16 }}>{sent ? '📬' : '✉️'}</div>
+      <div style={{ fontSize: 64, marginBottom: 16 }}>📬</div>
       <h2 style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 32, fontWeight: 900, textTransform: 'uppercase', marginBottom: 8 }}>
-        {sent ? t('auth.confirm.titleSent') : t('auth.confirm.title')}
+        {t('auth.confirm.titleSent')}
       </h2>
       <p style={{ fontSize: 15, color: 'var(--text-2)', marginBottom: 8, lineHeight: 1.6, maxWidth: 380 }}>
-        {sent
-          ? <>{t('auth.confirm.descriptionSent')} <strong style={{ color: 'var(--text)' }}>{email}</strong></>
-          : <>{t('auth.confirm.description')} <strong style={{ color: 'var(--text)' }}>{email}</strong></>
-        }
+        {t('auth.confirm.descriptionSent')} <strong style={{ color: 'var(--text)' }}>{email}</strong>
       </p>
-      {sent && (
-        <p style={{ fontSize: 15, color: 'var(--text-2)', marginBottom: 24, lineHeight: 1.6, maxWidth: 380 }}>
-          {t('auth.confirm.activateHint')}
-        </p>
-      )}
-      {!sent && (
-        <p style={{ fontSize: 14, color: 'var(--text-3)', marginBottom: 24, lineHeight: 1.6, maxWidth: 380 }}>
-          {t('auth.confirm.noSpam')}
-        </p>
-      )}
+      <p style={{ fontSize: 15, color: 'var(--text-2)', marginBottom: 24, lineHeight: 1.6, maxWidth: 380 }}>
+        {t('auth.confirm.activateHint')}
+      </p>
 
       {error && (
         <div style={{ background: 'var(--red-dim)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: 'var(--radius-sm)', padding: '10px 14px', fontSize: 13, color: 'var(--red)', marginBottom: 16, maxWidth: 320, width: '100%' }}>
@@ -60,22 +51,11 @@ function EmailConfirmScreen({ email, paymentUrl, onDone }) {
         </div>
       )}
 
-      {!sent ? (
-        <button
-          className="btn btn-primary btn-lg btn-full"
-          style={{ maxWidth: 320, marginBottom: 12 }}
-          onClick={handleSend}
-          disabled={loading}
-        >
-          {loading ? <span className="spinner" /> : t('auth.confirm.sendBtn')}
-        </button>
-      ) : (
-        <div style={{ background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', borderRadius: 'var(--radius-lg)', padding: '16px 20px', marginBottom: 24, maxWidth: 380, width: '100%' }}>
-          <p style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.5 }}>
-            {t('auth.confirm.spamWarning')}
-          </p>
-        </div>
-      )}
+      <div style={{ background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', borderRadius: 'var(--radius-lg)', padding: '16px 20px', marginBottom: 24, maxWidth: 380, width: '100%' }}>
+        <p style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.5 }}>
+          {t('auth.confirm.spamWarning')}
+        </p>
+      </div>
 
       {paymentUrl && (
         <div style={{ background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', borderRadius: 'var(--radius-lg)', padding: '20px', marginBottom: 16, maxWidth: 380, width: '100%' }}>
@@ -698,13 +678,13 @@ export default function AuthPage() {
                     onChange={(e) => set('promoCode', e.target.value.toUpperCase())}
                     style={{ textTransform: 'uppercase', letterSpacing: '0.08em' }}
                   />
-                  <span className="form-hint">Acceso gratuito con código válido</span>
+                  <span className="form-hint">{t('register.promoHint')}</span>
                 </div>
 
                 {/* Instagram follow CTA */}
                 <div style={{ background: 'var(--accent-dim)', border: '1px solid var(--accent-border)', borderRadius: 'var(--radius-lg)', padding: '14px 16px', textAlign: 'center' }}>
                   <p style={{ fontSize: 13, color: 'var(--text-2)', marginBottom: 10, lineHeight: 1.5 }}>
-                    📸 Síguenos en Instagram para obtener el código de acceso gratuito
+                    📸 {t('register.followInstaCta')}
                   </p>
                   <a
                     href="https://www.instagram.com/rutillas.app?igsh=OGJnamJnOW83dzRy&utm_source=qr"
@@ -713,7 +693,7 @@ export default function AuthPage() {
                     className="btn btn-primary btn-sm"
                     style={{ textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 6 }}
                   >
-                    📲 Seguir @rutillas.app
+                    📲 {t('register.followInstaBtn')}
                   </a>
                 </div>
 
