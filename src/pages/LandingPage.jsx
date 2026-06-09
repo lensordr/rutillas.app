@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom'
 import BlakerLogo from '../components/BlakerLogo'
+import { useT } from '../i18n/useT'
 
 export default function LandingPage() {
   const navigate = useNavigate()
+  const t = useT()
 
   return (
     <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', background: 'var(--bg)', position: 'relative', overflow: 'hidden' }}>
@@ -17,7 +19,7 @@ export default function LandingPage() {
           className="btn btn-primary btn-sm"
           onClick={() => navigate('/auth')}
         >
-          Entrar
+          {t('landing.login')}
         </button>
       </header>
 
@@ -37,12 +39,12 @@ export default function LandingPage() {
           marginTop: 32,
           maxWidth: 500,
         }}>
-          Rutas en moto<br />
-          <span style={{ color: 'var(--accent)' }}>por toda España</span>
+          {t('landing.heroTitle')}<br />
+          <span style={{ color: 'var(--accent)' }}>{t('landing.heroHighlight')}</span>
         </h1>
 
         <p style={{ fontSize: 16, color: 'var(--text-2)', lineHeight: 1.6, marginTop: 16, maxWidth: 400 }}>
-          Únete a la comunidad de riders. Organiza rutas, conoce gente y comparte la pasión por las dos ruedas.
+          {t('landing.heroDesc')}
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 32, width: '100%', maxWidth: 320 }}>
@@ -50,23 +52,23 @@ export default function LandingPage() {
             className="btn btn-primary btn-lg btn-full"
             onClick={() => navigate('/auth')}
           >
-            🏍️ Únete gratis
+            🏍️ {t('landing.joinFree')}
           </button>
           <button
             className="btn btn-ghost btn-full"
             onClick={() => navigate('/auth')}
           >
-            Ya tengo cuenta — Entrar
+            {t('landing.haveAccount')}
           </button>
         </div>
 
         {/* Features */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12, marginTop: 48, width: '100%', maxWidth: 400 }}>
           {[
-            { icon: '🏍️', title: 'Rutas grupales', desc: 'Organiza y únete a rutas con otros riders' },
-            { icon: '💬', title: 'Chat en vivo', desc: 'Coordina con tu grupo durante la ruta' },
-            { icon: '📍', title: 'Por ubicación', desc: 'Encuentra rutas cerca de ti en toda España' },
-            { icon: '📸', title: 'Comparte fotos', desc: 'Guarda los mejores momentos de cada ruta' },
+            { icon: '🏍️', title: t('landing.feature1Title'), desc: t('landing.feature1Desc') },
+            { icon: '💬', title: t('landing.feature2Title'), desc: t('landing.feature2Desc') },
+            { icon: '📍', title: t('landing.feature3Title'), desc: t('landing.feature3Desc') },
+            { icon: '📸', title: t('landing.feature4Title'), desc: t('landing.feature4Desc') },
           ].map((f) => (
             <div key={f.title} style={{
               background: 'var(--bg-2)',
@@ -89,16 +91,16 @@ export default function LandingPage() {
         <div style={{ marginTop: 48, padding: '24px 20px', background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: 400, boxShadow: 'var(--shadow-sm)' }}>
           <div style={{ height: 4, background: 'linear-gradient(90deg, var(--accent), var(--accent-2))', borderRadius: 2, marginBottom: 16 }} />
           <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 22, fontWeight: 900, textTransform: 'uppercase', marginBottom: 8 }}>
-            La comunidad crece
+            {t('landing.communityTitle')}
           </p>
           <p style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.6 }}>
-            Riders de Barcelona, Madrid, Valencia, Sevilla y más ciudades ya organizan sus rutas con RUTILLAS.
+            {t('landing.communityDesc')}
           </p>
           <div style={{ display: 'flex', gap: 16, marginTop: 16, justifyContent: 'center' }}>
             {[
-              { value: '🏍️', label: 'Rutas cada semana' },
-              { value: '📍', label: '+10 ciudades' },
-              { value: '👥', label: 'Comunidad activa' },
+              { value: '🏍️', label: t('landing.stat1') },
+              { value: '📍', label: t('landing.stat2') },
+              { value: '👥', label: t('landing.stat3') },
             ].map((s) => (
               <div key={s.label} style={{ textAlign: 'center' }}>
                 <p style={{ fontSize: 24 }}>{s.value}</p>
@@ -110,11 +112,11 @@ export default function LandingPage() {
 
         {/* Pricing teaser */}
         <div style={{ marginTop: 32, textAlign: 'center' }}>
-          <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 8 }}>Acceso completo desde</p>
+          <p style={{ fontSize: 13, color: 'var(--text-3)', marginBottom: 8 }}>{t('landing.pricingFrom')}</p>
           <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontSize: 36, fontWeight: 900, color: 'var(--accent)' }}>
-            3,99€<span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-2)' }}>/mes</span>
+            {t('routes.create.price')}<span style={{ fontSize: 16, fontWeight: 600, color: 'var(--text-2)' }}>{t('routes.create.priceUnit')}</span>
           </p>
-          <p style={{ fontSize: 13, color: 'var(--text-3)', marginTop: 4 }}>Cancela cuando quieras · Acceso gratuito en zona Barcelona</p>
+          <p style={{ fontSize: 13, color: 'var(--text-3)', marginTop: 4 }}>{t('landing.pricingHint')}</p>
         </div>
 
         {/* Final CTA */}
@@ -123,7 +125,7 @@ export default function LandingPage() {
             className="btn btn-primary btn-lg btn-full"
             onClick={() => navigate('/auth')}
           >
-            Empezar ahora
+            {t('landing.startNow')}
           </button>
         </div>
       </main>
@@ -131,7 +133,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer style={{ padding: '24px 20px', textAlign: 'center', borderTop: '1px solid var(--border)', position: 'relative', zIndex: 1 }}>
         <p style={{ fontSize: 12, color: 'var(--text-3)' }}>
-          © 2025 RUTILLAS · Comunidad de riders en moto por España
+          {t('landing.footer')}
         </p>
         <p style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 4 }}>
           <a href="mailto:rutillasmoto@outlook.com" style={{ color: 'var(--accent)', textDecoration: 'none' }}>rutillasmoto@outlook.com</a>

@@ -86,6 +86,17 @@ function NotificationPoller() {
 export default function App() {
   const currentUser = useStore((s) => s.currentUser)
 
+  // Detect language from browser on first load (before login/registration)
+  useEffect(() => {
+    const store = useStore.getState()
+    // Only auto-detect if user is not logged in (logged-in users get locale from profile)
+    if (!store.currentUser) {
+      const browserLang = navigator.language || navigator.userLanguage || 'es'
+      const isSpanish = browserLang.startsWith('es')
+      store.setLocale(isSpanish ? 'es' : 'en')
+    }
+  }, [])
+
   return (
     <ErrorBoundary>
     <BrowserRouter basename="/" future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
